@@ -1,0 +1,90 @@
+# Verificador central del Laboratorio SDLC Seguro (IC-8071).
+# Evalúa los checkpoints de cada repositorio de equipos.json con su propia copia de
+# checkpoints.py, que ningún equipo puede modificar, y guarda el resultado en
+# docs/tablero/central.json. Esa es la fuente de la nota de checkpoints.
+#
+# Sirve de modelo de workflow endurecido: permisos vacíos en el nivel superior,
+# permisos mínimos por job, actions fijadas por hash y ninguna action de terceros.
+name: Verificador central
+
+on:
+  schedule:
+    - cron: "0 12 * * *" # 06:00 en Costa Rica (UTC-6)
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: verificador
+  cancel-in-progress: false
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # commit de docs/tablero/central.json
+      pages: write # pedir la reconstrucción del sitio (fuente: main, carpeta /docs)
+    steps:
+      # persist-credentials queda activo a propósito: el último paso hace push del resultado.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Comprobar que cada repositorio de equipos.json es visible
+        env:
+          # VERIFICADOR_TOKEN es opcional: un token de solo lectura sobre los repositorios de
+          # equipo. Sin él se usa el GITHUB_TOKEN, que lee repositorios públicos con un
+          # límite de 1000 consultas por hora.
+          GH_TOKEN: ${{ secrets.VERIFICADOR_TOKEN || github.token }}
+        run: |
+          # Si un repositorio no se puede leer, checkpoints.py lo evaluaría como vacío y
+          # el equipo saldría con 0 %. Es preferible detenerse y avisar.
+          faltan=0
+          for repo in $(python3 -c 'import json; [print(e["repo"]) for e in json.load(open("equipos.json", encoding="utf-8"))]'); do
+            if gh api "repos/$repo" --silent; then
+              echo "visible: $repo"
+            else
+              echo "::error::No se puede leer $repo. Revise equipos.json, la visibilidad del repositorio o el token."
+              faltan=1
+            fi
+          done
+          exit "$faltan"
+
+      - name: Evaluar los checkpoints en lote
+        env:
+          GITHUB_TOKEN: ${{ secrets.VERIFICADOR_TOKEN || github.token }}
+        run: |
+          python3 verificador/checkpoints.py --lote equipos.json --salida docs/tablero/central.json
+          cp equipos.json docs/tablero/equipos.json
+
+      - name: Resumen de la corrida
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          estados = json.load(open("docs/tablero/central.json", encoding="utf-8"))
+          print("## Verificador central\n")
+          print("| Equipo | Repositorio | Fase actual | Puntaje de checkpoints |")
+          print("|:---|:---|:---|:---|")
+          for e in estados:
+              print(f"| {e['equipo']} | {e['repo']} | {e['fase_actual']} | {e['puntaje']} % |")
+          PY
+
+      - name: Guardar el resultado en main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/tablero/central.json docs/tablero/equipos.json
+          if git diff --cached --quiet; then
+            echo "Sin cambios que guardar."
+            exit 0
+          fi
+          git commit -m "Verificador central: $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
+
+      - name: Pedir la reconstrucción de GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Red de seguridad: si el push hecho con el GITHUB_TOKEN no dispara la construcción
+        # del sitio, esta llamada la pide. Si falla, el sitio se actualiza en el siguiente push.
+        run: |
+          gh api -X POST "repos/$GITHUB_REPOSITORY/pages/builds" --silent \
+            || echo "::warning::No se pudo pedir la construcción de Pages."

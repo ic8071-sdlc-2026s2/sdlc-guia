@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero SDLC Seguro</title>
+<meta name="description" content="Avance de los equipos del Laboratorio SDLC Seguro (IC-8071), para proyectar en clase.">
+<style>
+:root {
+  --fondo: #f6f6f3;
+  --superficie: #ffffff;
+  --texto: #18181b;
+  --suave: #57575f;
+  --tenue: #8a8a92;
+  --borde: #d9d9d3;
+  --barra: #e6e6e0;
+  --acento: #1d4ed8;
+  --acento-suave: #dbe5ff;
+  --ok: #15803d;
+  --ok-suave: #dcf5e3;
+  --aviso: #a15c07;
+  --aviso-suave: #fdefd6;
+  --error: #b42318;
+  --error-suave: #fde4e1;
+  --sombra: 0 1px 2px rgb(0 0 0 / 6%), 0 4px 16px rgb(0 0 0 / 5%);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fondo: #101114;
+    --superficie: #1a1b1f;
+    --texto: #f1f1ef;
+    --suave: #b0b0b8;
+    --tenue: #85858f;
+    --borde: #2f3137;
+    --barra: #2b2d33;
+    --acento: #7ea3ff;
+    --acento-suave: #1d2a4d;
+    --ok: #4ade80;
+    --ok-suave: #143322;
+    --aviso: #fbbf24;
+    --aviso-suave: #3a2c0c;
+    --error: #f87171;
+    --error-suave: #3d1717;
+    --sombra: none;
+    color-scheme: dark;
+  }
+}
+:root[data-tema="oscuro"] {
+  --fondo: #101114;
+  --superficie: #1a1b1f;
+  --texto: #f1f1ef;
+  --suave: #b0b0b8;
+  --tenue: #85858f;
+  --borde: #2f3137;
+  --barra: #2b2d33;
+  --acento: #7ea3ff;
+  --acento-suave: #1d2a4d;
+  --ok: #4ade80;
+  --ok-suave: #143322;
+  --aviso: #fbbf24;
+  --aviso-suave: #3a2c0c;
+  --error: #f87171;
+  --error-suave: #3d1717;
+  --sombra: none;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { font-size: clamp(15px, 0.55vw + 9px, 24px); }
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.86em; }
+
+.cabecera {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.5rem;
+  padding: 1rem clamp(1rem, 2.5vw, 2.5rem) 0.75rem;
+}
+.cabecera h1 { margin: 0; font-size: 1.6rem; letter-spacing: -0.01em; }
+.cabecera p { margin: 0.15rem 0 0; color: var(--suave); font-size: 0.9rem; }
+.controles { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.controles button {
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: 0.5rem;
+  padding: 0.35rem 0.8rem; font-size: 0.85rem; cursor: pointer;
+}
+.controles button[aria-pressed="true"] { background: var(--acento-suave); border-color: var(--acento); }
+.controles button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.estado-red { font-size: 0.85rem; color: var(--suave); min-width: 13rem; text-align: right; font-variant-numeric: tabular-nums; }
+
+.aviso-demo {
+  margin: 0 clamp(1rem, 2.5vw, 2.5rem) 0.75rem; padding: 0.5rem 0.9rem; border-radius: 0.5rem;
+  background: var(--aviso-suave); color: var(--texto); border: 1px solid var(--aviso); font-size: 0.9rem;
+}
+.resumen {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0 clamp(1rem, 2.5vw, 2.5rem) 0.75rem;
+}
+.resumen span {
+  font-size: 0.85rem; color: var(--suave); background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: 999px; padding: 0.2rem 0.7rem; font-variant-numeric: tabular-nums;
+}
+.resumen strong { color: var(--texto); }
+
+main { padding: 0 clamp(1rem, 2.5vw, 2.5rem) 1.5rem; }
+.rejilla { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 2400px) { .rejilla { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.equipo {
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: 0.9rem;
+  padding: 1rem 1.2rem 0.9rem; box-shadow: var(--sombra); display: flex; flex-direction: column; gap: 0.75rem;
+  min-width: 0;
+}
+.equipo-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.equipo-cab > div:first-child { min-width: 0; }
+.equipo-cab h2 { margin: 0; font-size: 1.45rem; line-height: 1.15; }
+.equipo-cab .app { margin: 0.15rem 0 0; color: var(--suave); font-size: 0.95rem; }
+.equipo-cab .repo { margin: 0.1rem 0 0; color: var(--tenue); font-size: 0.75rem; overflow-wrap: anywhere; }
+.equipo-cab .repo a { color: inherit; }
+.insignia { text-align: right; flex: none; }
+.insignia .fase {
+  display: inline-block; font-weight: 700; font-size: 1.6rem; line-height: 1; padding: 0.35rem 0.7rem;
+  border-radius: 0.6rem; background: var(--acento-suave); color: var(--acento); font-variant-numeric: tabular-nums;
+}
+.insignia .fase.completo { background: var(--ok-suave); color: var(--ok); }
+.insignia .puntaje { display: block; margin-top: 0.3rem; font-size: 0.85rem; color: var(--suave); font-variant-numeric: tabular-nums; }
+.insignia .puntaje strong { color: var(--texto); font-size: 1.05rem; }
+
+.fases { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+.fases li { display: grid; grid-template-columns: 2.2rem minmax(0, 9.5rem) 1fr 3.2rem; align-items: center; gap: 0.6rem; font-size: 0.85rem; }
+.fases .id { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--suave); }
+.fases .nombre { color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fases .barra { height: 0.7rem; background: var(--barra); border-radius: 999px; overflow: hidden; }
+.fases .barra span { display: block; height: 100%; width: 0; background: var(--tenue); border-radius: 999px; transition: width 0.6s ease; }
+.fases .pct { text-align: right; font-variant-numeric: tabular-nums; color: var(--suave); }
+.fases li.completa .barra span { background: var(--ok); }
+.fases li.completa .id, .fases li.completa .pct { color: var(--ok); }
+.fases li.actual .barra span { background: var(--acento); }
+.fases li.actual .id, .fases li.actual .nombre, .fases li.actual .pct { color: var(--texto); font-weight: 600; }
+
+.pendientes h3 { margin: 0 0 0.35rem; font-size: 0.9rem; color: var(--suave); font-weight: 600; }
+.pendientes ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+.pendientes li { font-size: 0.88rem; display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.6rem; align-items: baseline; }
+.pendientes li code { color: var(--error); background: var(--error-suave); padding: 0.05rem 0.4rem; border-radius: 0.35rem; white-space: nowrap; }
+.pendientes li small { grid-column: 2; color: var(--tenue); font-size: 0.78rem; }
+.pendientes .grupo { margin-top: 0.4rem; }
+.pendientes .mas { color: var(--tenue); font-size: 0.8rem; margin-top: 0.3rem; }
+.pendientes .listo { color: var(--ok); font-weight: 600; margin: 0; }
+
+.fuente { margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--borde); font-size: 0.75rem; color: var(--tenue); display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.punto { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--tenue); flex: none; }
+.fuente.pages .punto { background: var(--ok); }
+.fuente.central .punto { background: var(--aviso); }
+
+.equipo.sin-datos { border-style: dashed; }
+.sin-datos .mensaje { color: var(--suave); font-size: 0.92rem; margin: 0; }
+.sin-datos .mensaje code { overflow-wrap: anywhere; }
+
+.historial { background: var(--superficie); border: 1px solid var(--borde); border-radius: 0.9rem; padding: 1rem 1.2rem; box-shadow: var(--sombra); overflow-x: auto; }
+.historial h2 { margin: 0 0 0.25rem; font-size: 1.3rem; }
+.historial p { margin: 0 0 0.9rem; color: var(--suave); font-size: 0.9rem; }
+.historial table { border-collapse: collapse; width: 100%; min-width: 36rem; }
+.historial th, .historial td { text-align: left; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--borde); vertical-align: top; }
+.historial th { font-size: 0.85rem; color: var(--suave); font-weight: 600; }
+.historial th small { display: block; color: var(--tenue); font-weight: 400; }
+.historial td.equipo-nombre { font-weight: 600; white-space: nowrap; }
+.historial td.equipo-nombre small { display: block; font-weight: 400; color: var(--tenue); font-size: 0.78rem; }
+.celda .f { font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.celda .p { color: var(--suave); font-size: 0.82rem; margin-left: 0.35rem; font-variant-numeric: tabular-nums; }
+.segmentos { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; margin-top: 0.3rem; width: 8rem; }
+.segmentos i { height: 0.45rem; border-radius: 2px; background: var(--barra); position: relative; overflow: hidden; }
+.segmentos i b { position: absolute; inset: 0 auto 0 0; background: var(--acento); }
+.segmentos i.c b { background: var(--ok); }
+.celda.vacia { color: var(--tenue); }
+.historial .actual-col { background: var(--acento-suave); }
+
+.pie { padding: 0 clamp(1rem, 2.5vw, 2.5rem) 1.25rem; color: var(--tenue); font-size: 0.75rem; }
+.pie kbd { font-family: inherit; border: 1px solid var(--borde); border-bottom-width: 2px; border-radius: 0.3rem; padding: 0 0.3rem; }
+.error-global { background: var(--error-suave); border: 1px solid var(--error); border-radius: 0.6rem; padding: 0.8rem 1rem; }
+[hidden] { display: none !important; }
+
+@media (max-width: 520px) {
+  .fases li { grid-template-columns: 2rem 1fr 2.8rem; }
+  .fases .nombre { display: none; }
+  .estado-red { text-align: left; min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .fases .barra span { transition: none; } }
+</style>
+</head>
+<body>
+<header class="cabecera">
+  <div>
+    <h1>Laboratorio SDLC Seguro</h1>
+    <p>IC-8071 Seguridad del Software · avance de los equipos</p>
+  </div>
+  <div class="controles" role="toolbar" aria-label="Controles del tablero">
+    <button type="button" id="btn-ahora" aria-pressed="true">Ahora</button>
+    <button type="button" id="btn-historial" aria-pressed="false">Historial</button>
+    <button type="button" id="btn-pendientes" aria-pressed="false" title="Mostrar las condiciones pendientes de todas las fases">Todas las pendientes</button>
+    <button type="button" id="btn-tema" title="Cambiar entre automático, claro y oscuro">Tema: automático</button>
+    <button type="button" id="btn-actualizar">Actualizar</button>
+    <span class="estado-red" id="estado-red" aria-live="polite">Cargando…</span>
+  </div>
+</header>
+<div class="aviso-demo" id="aviso-demo" hidden>Datos de demostración generados en el navegador. Quite <code>?demo=1</code> de la dirección para ver los datos reales.</div>
+<div class="resumen" id="resumen" aria-label="Equipos por fase"></div>
+<main>
+  <section id="vista-ahora" class="rejilla" aria-label="Estado actual de cada equipo"></section>
+  <section id="vista-historial" hidden aria-label="Avance al cierre de cada sesión"></section>
+</main>
+<footer class="pie">
+  <span id="fuente-texto">Fuente: <code>estado.json</code> de la página de cada equipo; si no responde, el verificador central (<code>central.json</code>).</span>
+  Atajos: <kbd>H</kbd> historial · <kbd>P</kbd> pendientes · <kbd>T</kbd> tema · <kbd>R</kbd> actualizar.
+</footer>
+
+<script>
+"use strict";
+
+const INTERVALO_S = 60;
+const SESIONES = 5;
+const FASES = [
+  { id: 0, corto: "Arranque" },
+  { id: 1, corto: "Abuso y requerimientos" },
+  { id: 2, corto: "Riesgo arquitectónico" },
+  { id: 3, corto: "SAST y cadena" },
+  { id: 4, corto: "DAST y pruebas" },
+  { id: 5, corto: "Release y gate" },
+];
+const MAX_PENDIENTES = 6;
+
+const params = new URLSearchParams(location.search);
+const DEMO = params.has("demo");
+const RUTA_EQUIPOS = params.get("equipos") || "equipos.json";
+const RUTA_CENTRAL = params.get("central") || "central.json";
+
+const estado = {
+  equipos: [],
+  porEquipo: new Map(),   // clave del repo -> { datos, fuente, generado, error }
+  central: new Map(),
+  centralGenerado: "",
+  historial: [],          // [{ n, estados: Map(clave -> estado), generado }]
+  vista: params.get("vista") === "historial" ? "historial" : "ahora",
+  todas: false,
+  restante: INTERVALO_S,
+  ocupado: false,
+  ultima: null,
+  errorEquipos: "",
+};
+
+// Utilidades ------------------------------------------------------------
+
+function h(etiqueta, atributos, ...hijos) {
+  const el = document.createElement(etiqueta);
+  for (const [k, v] of Object.entries(atributos || {})) {
+    if (v === undefined || v === null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "style") el.setAttribute("style", v);
+    else el.setAttribute(k, v === true ? "" : String(v));
+  }
+  for (const hijo of hijos.flat()) {
+    if (hijo === undefined || hijo === null || hijo === false) continue;
+    el.append(hijo instanceof Node ? hijo : document.createTextNode(String(hijo)));
+  }
+  return el;
+}
+
+function clave(repo) { return String(repo || "").trim().toLowerCase(); }
+
+function urlSegura(url) {
+  try {
+    const u = new URL(url, location.href);
+    return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
+  } catch (e) { return ""; }
+}
+
+function urlPages(equipo) {
+  if (equipo.pages) {
+    const u = urlSegura(equipo.pages);
+    if (u) return u.endsWith("/") ? u : u + "/";
+  }
+  const [dueno, repo] = String(equipo.repo || "").split("/");
+  if (!dueno || !repo) return "";
+  return `https://${dueno.toLowerCase()}.github.io/${repo}/`;
+}
+
+async function pedirJSON(url, espera = 12000) {
+  const control = new AbortController();
+  const temporizador = setTimeout(() => control.abort(), espera);
+  try {
+    const sep = url.includes("?") ? "&" : "?";
+    const r = await fetch(`${url}${sep}t=${Date.now()}`, { cache: "no-store", signal: control.signal });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch (e) {
+    if (e.name === "AbortError") throw new Error("sin respuesta");
+    if (e instanceof TypeError) throw new Error("no se pudo conectar");
+    throw e;
+  } finally {
+    clearTimeout(temporizador);
+  }
+}
+
+function esEstado(d) {
+  return d && typeof d === "object" && Array.isArray(d.fases) && d.fases.length > 0
+    && Number.isFinite(Number(d.fase_actual));
+}
+
+function hace(iso) {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return "";
+  const s = Math.max(0, Math.round((Date.now() - t) / 1000));
+  if (s < 60) return "hace menos de un minuto";
+  const m = Math.round(s / 60);
+  if (m < 60) return `hace ${m} min`;
+  const hrs = Math.round(m / 60);
+  if (hrs < 48) return `hace ${hrs} h`;
+  return `hace ${Math.round(hrs / 24)} días`;
+}
+
+function fecha(iso) {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return "";
+  return new Date(t).toLocaleString("es-CR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function pct(x) {
+  const n = Number(x);
+  return Number.isFinite(n) ? `${Math.round(n * 100)} %` : "–";
+}
+
+function puntaje(x) {
+  const n = Number(x);
+  return Number.isFinite(n) ? `${n.toFixed(1)} %` : "–";
+}
+
+function leer(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function guardar(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* sin almacenamiento */ } }
+
+// Datos -----------------------------------------------------------------
+
+async function cargarEquipos() {
+  if (DEMO) {
+    estado.equipos = demoEquipos();
+    return;
+  }
+  try {
+    const lista = await pedirJSON(RUTA_EQUIPOS);
+    if (!Array.isArray(lista)) throw new Error("no es una lista");
+    estado.equipos = lista.filter(e => e && e.repo).map(e => ({
+      equipo: String(e.equipo || e.repo), app: String(e.app || ""), repo: String(e.repo), pages: e.pages ? String(e.pages) : "",
+    }));
+    estado.errorEquipos = "";
+  } catch (e) {
+    if (!estado.equipos.length) estado.errorEquipos = `No se pudo leer ${RUTA_EQUIPOS}: ${e.message}.`;
+  }
+}
+
+async function cargarCentral() {
+  if (DEMO) return;
+  try {
+    const lista = await pedirJSON(RUTA_CENTRAL);
+    if (!Array.isArray(lista)) return;
+    estado.central = new Map(lista.filter(esEstado).map(d => [clave(d.repo), d]));
+    estado.centralGenerado = lista.map(d => d.generado || "").sort().pop() || "";
+  } catch (e) { /* el verificador central todavía no ha corrido */ }
+}
+
+async function cargarEquipo(eq) {
+  const k = clave(eq.repo);
+  if (DEMO) {
+    const d = demoEstado(eq, estado.equipos.indexOf(eq));
+    estado.porEquipo.set(k, d ? { datos: d, fuente: "pages" } : { datos: null, fuente: "ninguna", error: "HTTP 404" });
+    return;
+  }
+  const url = urlPages(eq);
+  try {
+    if (!url) throw new Error("sin URL de Pages");
+    const d = await pedirJSON(url + "estado.json");
+    if (!esEstado(d)) throw new Error("estado.json con formato inesperado");
+    if (d.repo && clave(d.repo) !== k) throw new Error(`estado.json es de ${d.repo}`);
+    estado.porEquipo.set(k, { datos: d, fuente: "pages", url });
+  } catch (e) {
+    const c = estado.central.get(k);
+    estado.porEquipo.set(k, c ? { datos: c, fuente: "central", error: e.message, url } : { datos: null, fuente: "ninguna", error: e.message, url });
+  }
+}
+
+async function cargarHistorial() {
+  if (DEMO) { estado.historial = demoHistorial(); return; }
+  const resultados = await Promise.all(Array.from({ length: SESIONES }, (_, i) => i + 1).map(async n => {
+    try {
+      const lista = await pedirJSON(`historial/sesion-${n}.json`);
+      if (!Array.isArray(lista)) return null;
+      const validos = lista.filter(esEstado);
+      return {
+        n,
+        estados: new Map(validos.map(d => [clave(d.repo), d])),
+        porNombre: new Map(validos.map(d => [String(d.equipo || "").toLowerCase(), d])),
+        generado: validos.map(d => d.generado || "").sort().pop() || "",
+      };
+    } catch (e) { return null; }
+  }));
+  estado.historial = resultados.filter(Boolean);
+}
+
+let ciclos = 0;
+async function actualizar() {
+  if (estado.ocupado) return;
+  estado.ocupado = true;
+  pintarEstadoRed("Actualizando…");
+  try {
+    await cargarEquipos();
+    await cargarCentral();
+    await Promise.all(estado.equipos.map(cargarEquipo));
+    if (ciclos % 10 === 0 || estado.vista === "historial") await cargarHistorial();
+    ciclos += 1;
+    estado.ultima = new Date();
+  } finally {
+    estado.ocupado = false;
+    estado.restante = INTERVALO_S;
+    pintar();
+  }
+}
+
+// Vista: ahora ------------------------------------------------------------
+
+function tarjeta(eq) {
+  const k = clave(eq.repo);
+  const info = estado.porEquipo.get(k) || { datos: null, fuente: "ninguna" };
+  const d = info.datos;
+  const enlaceRepo = urlSegura(`https://github.com/${eq.repo}`);
+  const cab = h("div", { class: "equipo-cab" },
+    h("div", null,
+      h("h2", null, eq.equipo),
+      h("p", { class: "app" }, eq.app || (d && d.app) || ""),
+      h("p", { class: "repo" }, enlaceRepo ? h("a", { href: enlaceRepo, target: "_blank", rel: "noopener" }, eq.repo) : eq.repo)),
+    d ? insignia(d) : null);
+
+  if (!d) {
+    return h("article", { class: "equipo sin-datos" }, cab,
+      h("p", { class: "mensaje" }, "Todavía no hay datos de este equipo. Aparecerá cuando active GitHub Pages con la fuente «GitHub Actions» (fase 0) y corra el workflow «Checkpoints»."),
+      h("div", { class: "fuente" }, h("span", { class: "punto" }),
+        "Sin Pages todavía", info.url ? h("code", null, info.url + "estado.json") : null,
+        info.error ? `(${info.error})` : null));
+  }
+
+  const fases = h("ol", { class: "fases", "aria-label": "Avance por fase" });
+  for (const f of FASES) {
+    const datosFase = (d.fases || []).find(x => Number(x.id) === f.id) || { logro: 0, completa: false };
+    const actual = Number(d.fase_actual) === f.id;
+    const clase = datosFase.completa ? "completa" : (actual ? "actual" : "");
+    const ancho = Math.max(0, Math.min(100, Math.round(Number(datosFase.logro || 0) * 100)));
+    fases.append(h("li", { class: clase, title: datosFase.nombre || f.corto },
+      h("span", { class: "id" }, `F${f.id}`),
+      h("span", { class: "nombre" }, f.corto),
+      h("span", { class: "barra", role: "img", "aria-label": `Fase ${f.id}: ${ancho} %` }, h("span", { style: `width:${ancho}%` })),
+      h("span", { class: "pct" }, `${ancho} %`)));
+  }
+
+  const fuente = info.fuente === "pages"
+    ? h("div", { class: "fuente pages" }, h("span", { class: "punto" }), "Página del equipo", d.generado ? ` · generado ${hace(d.generado)}` : null)
+    : h("div", { class: "fuente central" }, h("span", { class: "punto" }),
+        "Verificador central", d.generado ? ` · ${fecha(d.generado)}` : null,
+        info.error ? ` · la página del equipo no respondió (${info.error})` : null);
+
+  return h("article", { class: "equipo" }, cab, fases, pendientes(d), fuente);
+}
+
+function insignia(d) {
+  const n = Number(d.fase_actual);
+  const completo = n >= FASES.length;
+  return h("div", { class: "insignia" },
+    h("span", { class: completo ? "fase completo" : "fase" }, completo ? "Completo" : `Fase ${n}`),
+    h("span", { class: "puntaje" }, "Checkpoints ", h("strong", null, puntaje(d.puntaje))));
+}
+
+function itemPendiente(c) {
+  return h("li", null, h("code", null, c.id || "?"), h("span", null, c.descripcion || ""), c.detalle ? h("small", null, c.detalle) : null);
+}
+
+function pendientes(d) {
+  const caja = h("div", { class: "pendientes" });
+  const fasesDatos = (d.fases || []).slice().sort((a, b) => Number(a.id) - Number(b.id));
+  const conPendientes = fasesDatos.filter(f => (f.checks || []).some(c => !c.ok));
+  if (!conPendientes.length) {
+    caja.append(h("p", { class: "listo" }, "Las 29 condiciones están cumplidas."));
+    return caja;
+  }
+  if (estado.todas) {
+    for (const f of conPendientes) {
+      const faltan = (f.checks || []).filter(c => !c.ok);
+      caja.append(h("div", { class: "grupo" },
+        h("h3", null, `Fase ${f.id} · ${faltan.length} pendiente${faltan.length === 1 ? "" : "s"}`),
+        h("ul", null, faltan.map(itemPendiente))));
+    }
+    return caja;
+  }
+  const actual = fasesDatos.find(f => Number(f.id) === Number(d.fase_actual)) || conPendientes[0];
+  const faltan = (actual.checks || []).filter(c => !c.ok);
+  caja.append(h("h3", null, `Pendiente en la fase ${actual.id}`));
+  caja.append(h("ul", null, faltan.slice(0, MAX_PENDIENTES).map(itemPendiente)));
+  if (faltan.length > MAX_PENDIENTES) caja.append(h("p", { class: "mas" }, `y ${faltan.length - MAX_PENDIENTES} más`));
+  const otras = conPendientes.filter(f => f !== actual).reduce((s, f) => s + (f.checks || []).filter(c => !c.ok).length, 0);
+  if (otras) caja.append(h("p", { class: "mas" }, `Además, ${otras} pendiente${otras === 1 ? "" : "s"} en otras fases (tecla P para verlas).`));
+  return caja;
+}
+
+function pintarResumen() {
+  const caja = document.getElementById("resumen");
+  caja.replaceChildren();
+  if (estado.vista !== "ahora" || !estado.equipos.length) return;
+  const cuenta = new Map();
+  let sinDatos = 0;
+  for (const eq of estado.equipos) {
+    const d = (estado.porEquipo.get(clave(eq.repo)) || {}).datos;
+    if (!d) { sinDatos += 1; continue; }
+    const n = Math.min(Number(d.fase_actual), FASES.length);
+    cuenta.set(n, (cuenta.get(n) || 0) + 1);
+  }
+  for (let n = 0; n <= FASES.length; n += 1) {
+    if (!cuenta.get(n)) continue;
+    const etiqueta = n === FASES.length ? "Completos" : `En la fase ${n}`;
+    caja.append(h("span", null, `${etiqueta}: `, h("strong", null, String(cuenta.get(n)))));
+  }
+  if (sinDatos) caja.append(h("span", null, "Sin datos: ", h("strong", null, String(sinDatos))));
+}
+
+// Vista: historial --------------------------------------------------------
+
+function celdaHistorial(d) {
+  if (!d) return h("td", { class: "celda vacia" }, "–");
+  const n = Number(d.fase_actual);
+  const seg = h("div", { class: "segmentos", "aria-hidden": "true" });
+  for (const f of FASES) {
+    const df = (d.fases || []).find(x => Number(x.id) === f.id) || { logro: 0 };
+    const ancho = Math.max(0, Math.min(100, Math.round(Number(df.logro || 0) * 100)));
+    seg.append(h("i", { class: df.completa ? "c" : "" }, h("b", { style: `width:${ancho}%` })));
+  }
+  return h("td", { class: "celda" },
+    h("span", { class: "f" }, n >= FASES.length ? "Completo" : `F${n}`),
+    h("span", { class: "p" }, puntaje(d.puntaje)), seg);
+}
+
+function pintarHistorial() {
+  const vista = document.getElementById("vista-historial");
+  vista.replaceChildren();
+  const caja = h("div", { class: "historial" },
+    h("h2", null, "Avance al cierre de cada sesión"),
+    h("p", null, "Cada columna es la foto que guardó el verificador central al cerrar la sesión. La última columna es el estado de ahora."));
+  if (!estado.historial.length) {
+    caja.append(h("p", null, "Todavía no hay cierres de sesión guardados en historial/sesion-N.json."));
+  }
+  const cabeza = h("tr", null, h("th", null, "Equipo"),
+    estado.historial.map(s => h("th", null, `Sesión ${s.n}`, s.generado ? h("small", null, fecha(s.generado)) : null)),
+    h("th", { class: "actual-col" }, "Ahora"));
+  const cuerpo = h("tbody");
+  for (const eq of estado.equipos) {
+    const k = clave(eq.repo);
+    const nombre = eq.equipo.toLowerCase();
+    const ahora = (estado.porEquipo.get(k) || {}).datos;
+    cuerpo.append(h("tr", null,
+      h("td", { class: "equipo-nombre" }, eq.equipo, h("small", null, eq.app)),
+      estado.historial.map(s => celdaHistorial(s.estados.get(k) || s.porNombre.get(nombre))),
+      (() => { const td = celdaHistorial(ahora); td.classList.add("actual-col"); return td; })()));
+  }
+  caja.append(h("table", null, h("thead", null, cabeza), cuerpo));
+  vista.append(caja);
+}
+
+// Pintado general -----------------------------------------------------------
+
+function pintarEstadoRed(texto) {
+  const el = document.getElementById("estado-red");
+  if (texto) { el.textContent = texto; return; }
+  const ultima = estado.ultima ? estado.ultima.toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" }) : "–";
+  el.textContent = `Actualizado ${ultima} · próxima en ${estado.restante} s`;
+}
+
+function pintar() {
+  const ahora = document.getElementById("vista-ahora");
+  const historial = document.getElementById("vista-historial");
+  ahora.hidden = estado.vista !== "ahora";
+  historial.hidden = estado.vista !== "historial";
+  document.getElementById("btn-ahora").setAttribute("aria-pressed", String(estado.vista === "ahora"));
+  document.getElementById("btn-historial").setAttribute("aria-pressed", String(estado.vista === "historial"));
+  document.getElementById("btn-pendientes").setAttribute("aria-pressed", String(estado.todas));
+  document.getElementById("aviso-demo").hidden = !DEMO;
+
+  ahora.replaceChildren();
+  if (estado.errorEquipos) {
+    ahora.append(h("div", { class: "error-global" }, estado.errorEquipos,
+      " Revise que docs/tablero/equipos.json exista y sea una lista de objetos con equipo, app, repo y pages."));
+  } else if (!estado.equipos.length) {
+    ahora.append(h("p", null, "equipos.json no tiene equipos todavía."));
+  } else {
+    for (const eq of estado.equipos) ahora.append(tarjeta(eq));
+  }
+  if (estado.vista === "historial") pintarHistorial();
+  pintarResumen();
+  pintarEstadoRed();
+}
+
+// Tema -------------------------------------------------------------------------
+
+const TEMAS = ["automático", "claro", "oscuro"];
+let tema = params.get("tema") || leer("tablero-tema") || "automático";
+if (!TEMAS.includes(tema)) tema = "automático";
+
+function aplicarTema() {
+  if (tema === "automático") document.documentElement.removeAttribute("data-tema");
+  else document.documentElement.setAttribute("data-tema", tema);
+  document.getElementById("btn-tema").textContent = `Tema: ${tema}`;
+}
+
+function cambiarTema() {
+  tema = TEMAS[(TEMAS.indexOf(tema) + 1) % TEMAS.length];
+  guardar("tablero-tema", tema);
+  aplicarTema();
+}
+
+// Demostración -------------------------------------------------------------------
+
+const CONDICIONES = [
+  [0, "f0.equipo", "EQUIPO.md lista al menos 4 integrantes con usuario de GitHub"],
+  [0, "f0.ci", "El workflow «Fase 0 · CI» terminó en verde en la rama principal"],
+  [0, "f0.pages", "GitHub Pages está activado (fuente: GitHub Actions)"],
+  [1, "f1.casos", "Al menos 6 casos de abuso"],
+  [1, "f1.categorias", "Los casos cubren al menos 5 categorías distintas"],
+  [1, "f1.gherkin", "Cada caso de abuso tiene escenario Dado, Cuando, Entonces"],
+  [1, "f1.cornucopia", "Cada caso de abuso cita su carta de Cornucopia"],
+  [1, "f1.requerimientos", "Al menos 6 requerimientos con identificador ASVS 5.0"],
+  [1, "f1.trazabilidad", "Cada caso de abuso enlaza al menos un requerimiento existente"],
+  [2, "f2.dfd", "El DFD fue editado e incluye al menos una frontera de confianza"],
+  [2, "f2.matriz", "La matriz 3 por 3 tiene al menos 6 riesgos con P × I correcto y caso de abuso"],
+  [2, "f2.cobertura", "Todos los casos de abuso aparecen en la matriz"],
+  [3, "f3.workflow", "fase3-seguridad-pr.yml corre Semgrep, Gitleaks y Dependency Review"],
+  [3, "f3.pr", "El workflow de seguridad corrió en verde sobre un pull request"],
+  [3, "f3.regla", "Hay una regla propia de Semgrep con prueba que verifica un requerimiento"],
+  [3, "f3.dependabot", "dependabot.yml vigila las dependencias de app/"],
+  [3, "f3.fijadas", "Todas las actions están fijadas por hash de commit"],
+  [3, "f3.permisos", "Cada workflow declara permissions en el nivel superior"],
+  [3, "f3.rama", "Un ruleset exige pull request para integrar a la rama principal"],
+  [3, "f3.scorecard", "OpenSSF Scorecard corrió al menos una vez"],
+  [4, "f4.dast", "fase4-dast.yml corre ZAP y pytest y terminó en verde"],
+  [4, "f4.pruebas", "Al menos 3 pruebas marcadas con un caso de abuso existente"],
+  [4, "f4.hallazgos", "Al menos 4 hallazgos trazados de 3 herramientas distintas"],
+  [5, "f5.release", "fase5-release.yml escanea, genera SBOM, firma, atesta y terminó en verde"],
+  [5, "f5.sbom", "Un GitHub Release publica el SBOM"],
+  [5, "f5.attestation", "El digest de la imagen del release tiene attestations verificables en GitHub"],
+  [5, "f5.correcciones", "Al menos 3 debilidades trazadas corregidas (prueba «corregida» e issue cerrado)"],
+  [5, "f5.lineabase", "Cada excepción de la línea base tiene justificación"],
+  [5, "f5.presentacion", "La presentación está completa"],
+];
+
+function demoEquipos() {
+  return [
+    { equipo: "Equipo 1", app: "OWASP Juice Shop", repo: "demo/sdlc-juice-shop-equipo-1", pages: "" },
+    { equipo: "Equipo 2", app: "OWASP PyGoat", repo: "demo/sdlc-pygoat-equipo-2", pages: "" },
+    { equipo: "Equipo 3", app: "VAmPI", repo: "demo/sdlc-vampi-equipo-3", pages: "" },
+    { equipo: "Equipo 4", app: "OWASP RailsGoat", repo: "demo/sdlc-railsgoat-equipo-4", pages: "" },
+  ];
+}
+
+function demoConstruir(eq, cumplidas, generado) {
+  const fases = FASES.map(f => {
+    const checks = CONDICIONES.filter(c => c[0] === f.id).map(([, id, descripcion]) => ({
+      id, descripcion, ok: cumplidas.has(id), detalle: cumplidas.has(id) ? "" : "dato de demostración",
+    }));
+    const logrados = checks.filter(c => c.ok).length;
+    return { id: f.id, nombre: f.corto, completa: logrados === checks.length, logro: Math.round(logrados / checks.length * 1000) / 1000, checks };
+  });
+  const actual = (fases.find(f => !f.completa) || { id: FASES.length }).id;
+  return {
+    repo: eq.repo, app: eq.app, equipo: eq.equipo, generado, fase_actual: actual,
+    puntaje: Math.round(fases.reduce((s, f) => s + f.logro, 0) / fases.length * 1000) / 10, fases, reflexiones: [],
+  };
+}
+
+function demoCumplidas(hasta) { return new Set(CONDICIONES.slice(0, hasta).map(c => c[1])); }
+
+function demoEstado(eq, i) {
+  const avance = [22, 14, 9, null][i];
+  if (avance === null || avance === undefined) return null;
+  const hechas = demoCumplidas(avance);
+  if (i === 1) hechas.delete("f0.pages");
+  return demoConstruir(eq, hechas, new Date(Date.now() - (i + 1) * 180000).toISOString());
+}
+
+function demoHistorial() {
+  const eqs = demoEquipos();
+  const avances = [[3, 2, 2, 0], [12, 8, 6, 3]];
+  return avances.map((fila, s) => {
+    const estados = new Map(eqs.map((eq, i) => [clave(eq.repo), demoConstruir(eq, demoCumplidas(fila[i]), new Date(Date.now() - (2 - s) * 7 * 86400000).toISOString())]));
+    return { n: s + 1, estados, porNombre: new Map(), generado: new Date(Date.now() - (2 - s) * 7 * 86400000).toISOString() };
+  });
+}
+
+// Arranque -------------------------------------------------------------------------
+
+function cambiarVista(v) {
+  estado.vista = v;
+  if (v === "historial" && !estado.historial.length && !DEMO) cargarHistorial().then(pintar);
+  pintar();
+}
+
+document.getElementById("btn-ahora").addEventListener("click", () => cambiarVista("ahora"));
+document.getElementById("btn-historial").addEventListener("click", () => cambiarVista("historial"));
+document.getElementById("btn-pendientes").addEventListener("click", () => { estado.todas = !estado.todas; pintar(); });
+document.getElementById("btn-tema").addEventListener("click", cambiarTema);
+document.getElementById("btn-actualizar").addEventListener("click", actualizar);
+document.addEventListener("keydown", ev => {
+  if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const t = ev.key.toLowerCase();
+  if (t === "h") cambiarVista(estado.vista === "historial" ? "ahora" : "historial");
+  else if (t === "p") { estado.todas = !estado.todas; pintar(); }
+  else if (t === "t") cambiarTema();
+  else if (t === "r") actualizar();
+});
+
+setInterval(() => {
+  if (estado.ocupado) return;
+  estado.restante -= 1;
+  if (estado.restante <= 0) actualizar();
+  else pintarEstadoRed();
+}, 1000);
+
+aplicarTema();
+actualizar();
+</script>
+</body>
+</html>

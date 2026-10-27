@@ -1,0 +1,56 @@
+# Sitio de la guía del Laboratorio SDLC Seguro (IC-8071).
+# GitHub Pages lo construye con Jekyll desde la carpeta /docs de la rama main.
+
+title: Laboratorio SDLC Seguro
+description: Guía, tablero y herramientas del laboratorio de IC-8071 Seguridad del Software.
+lang: es-CR
+
+# Organización de GitHub del curso. Cambie solo esta línea (y equipos.json en la raíz).
+# profesor/scripts/publicar-plantillas.sh la sustituye al publicar.
+org: ORGANIZACION
+
+url: "https://ORGANIZACION.github.io"
+baseurl: "/sdlc-guia"
+permalink: pretty
+
+remote_theme: just-the-docs/just-the-docs@v0.10.1
+plugins:
+  - jekyll-remote-theme
+
+color_scheme: light
+search_enabled: true
+search:
+  heading_level: 3
+  previews: 2
+  preview_words_before: 5
+  preview_words_after: 10
+  rel_url: true
+  button: false
+heading_anchors: true
+back_to_top: true
+back_to_top_text: "Volver arriba"
+
+nav_external_links:
+  - title: Tablero de avance
+    url: "https://ORGANIZACION.github.io/sdlc-guia/tablero/"
+    opens_in_new_tab: true
+
+callouts_level: quiet
+callouts:
+  nota:
+    title: Nota
+    color: blue
+  importante:
+    title: Importante
+    color: yellow
+  advertencia:
+    title: Advertencia
+    color: red
+  prediccion:
+    title: Predicción con revelación
+    color: purple
+  checkpoint:
+    title: Checkpoint
+    color: green
+
+# docs/tablero/ es HTML y JSON sin front matter: Jekyll los copia tal cual.
