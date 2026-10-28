@@ -53,4 +53,12 @@ callouts:
     title: Checkpoint
     color: green
 
+# GitHub Pages asigna este layout por su plugin jekyll-default-layout; declararlo aquí
+# hace que la guía se vea igual al construirla fuera de Pages.
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
 # docs/tablero/ es HTML y JSON sin front matter: Jekyll los copia tal cual.
