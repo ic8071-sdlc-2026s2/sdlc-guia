@@ -23,7 +23,7 @@ La lección central: **ninguna técnica detecta todas las debilidades**. Las fal
 
 ## Calendario
 
-Son 5 sesiones de 90 minutos. Las fechas las fija el enunciado del curso. Cada sesión empieza con 5 minutos en los que el profesor muestra la fase anterior resuelta sobre **PuraVidaPay**, su app de demostración.
+Son 5 sesiones de 90 minutos. Las fechas las fija el enunciado del curso. Cada sesión empieza con 5 minutos en los que el profesor muestra la fase anterior resuelta sobre su app de demostración, **Damn Vulnerable GraphQL Application** (DVGA), que no le toca a ningún equipo.
 
 | Sesión | Fases | Qué hace el equipo | Guía |
 |:---|:---|:---|:---|
