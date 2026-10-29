@@ -108,32 +108,31 @@ code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-si
 .resumen strong { color: var(--texto); }
 
 main { padding: 0 clamp(1rem, 2.5vw, 2.5rem) 1.5rem; }
-.rejilla { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 900px) { .rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 2400px) { .rejilla { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* Hasta 4 equipos lado a lado en un proyector de 1280 px o más; en pantallas angostas, una columna. */
+.rejilla { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); align-items: start; }
 
 .equipo {
   background: var(--superficie); border: 1px solid var(--borde); border-radius: 0.9rem;
-  padding: 1rem 1.2rem 0.9rem; box-shadow: var(--sombra); display: flex; flex-direction: column; gap: 0.75rem;
+  padding: 0.8rem 0.95rem 0.75rem; box-shadow: var(--sombra); display: flex; flex-direction: column; gap: 0.6rem;
   min-width: 0;
 }
 .equipo-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
 .equipo-cab > div:first-child { min-width: 0; }
-.equipo-cab h2 { margin: 0; font-size: 1.45rem; line-height: 1.15; }
+.equipo-cab h2 { margin: 0; font-size: 1.3rem; line-height: 1.15; }
 .equipo-cab .app { margin: 0.15rem 0 0; color: var(--suave); font-size: 0.95rem; }
 .equipo-cab .repo { margin: 0.1rem 0 0; color: var(--tenue); font-size: 0.75rem; overflow-wrap: anywhere; }
 .equipo-cab .repo a { color: inherit; }
 .insignia { text-align: right; flex: none; }
 .insignia .fase {
-  display: inline-block; font-weight: 700; font-size: 1.6rem; line-height: 1; padding: 0.35rem 0.7rem;
+  display: inline-block; font-weight: 700; font-size: 1.35rem; line-height: 1; padding: 0.3rem 0.6rem;
   border-radius: 0.6rem; background: var(--acento-suave); color: var(--acento); font-variant-numeric: tabular-nums;
 }
 .insignia .fase.completo { background: var(--ok-suave); color: var(--ok); }
 .insignia .puntaje { display: block; margin-top: 0.3rem; font-size: 0.85rem; color: var(--suave); font-variant-numeric: tabular-nums; }
 .insignia .puntaje strong { color: var(--texto); font-size: 1.05rem; }
 
-.fases { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
-.fases li { display: grid; grid-template-columns: 2.2rem minmax(0, 9.5rem) 1fr 3.2rem; align-items: center; gap: 0.6rem; font-size: 0.85rem; }
+.fases { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.22rem; }
+.fases li { display: grid; grid-template-columns: 1.8rem minmax(0, 7rem) minmax(2rem, 1fr) 2.6rem; align-items: center; gap: 0.45rem; font-size: 0.8rem; }
 .fases .id { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--suave); }
 .fases .nombre { color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fases .barra { height: 0.7rem; background: var(--barra); border-radius: 999px; overflow: hidden; }
@@ -146,9 +145,9 @@ main { padding: 0 clamp(1rem, 2.5vw, 2.5rem) 1.5rem; }
 
 .pendientes h3 { margin: 0 0 0.35rem; font-size: 0.9rem; color: var(--suave); font-weight: 600; }
 .pendientes ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
-.pendientes li { font-size: 0.88rem; display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.6rem; align-items: baseline; }
+.pendientes li { font-size: 0.82rem; display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.6rem; align-items: baseline; }
 .pendientes li code { color: var(--error); background: var(--error-suave); padding: 0.05rem 0.4rem; border-radius: 0.35rem; white-space: nowrap; }
-.pendientes li small { grid-column: 2; color: var(--tenue); font-size: 0.78rem; }
+.pendientes li small { grid-column: 2; color: var(--tenue); font-size: 0.74rem; }
 .pendientes .grupo { margin-top: 0.4rem; }
 .pendientes .mas { color: var(--tenue); font-size: 0.8rem; margin-top: 0.3rem; }
 .pendientes .listo { color: var(--ok); font-weight: 600; margin: 0; }
@@ -232,7 +231,7 @@ const FASES = [
   { id: 4, corto: "DAST y pruebas" },
   { id: 5, corto: "Release y gate" },
 ];
-const MAX_PENDIENTES = 6;
+const MAX_PENDIENTES = 3;
 
 const params = new URLSearchParams(location.search);
 const DEMO = params.has("demo");
@@ -447,7 +446,7 @@ function tarjeta(eq) {
       h("p", { class: "mensaje" }, "Todavía no hay datos de este equipo. Aparecerá cuando active GitHub Pages con la fuente «GitHub Actions» (fase 0) y corra el workflow «Checkpoints»."),
       h("div", { class: "fuente" }, h("span", { class: "punto" }),
         "Sin Pages todavía", info.url ? h("code", null, info.url + "estado.json") : null,
-        info.error ? `(${info.error})` : null));
+        info.error ? ` (${info.error})` : null));
   }
 
   const fases = h("ol", { class: "fases", "aria-label": "Avance por fase" });
