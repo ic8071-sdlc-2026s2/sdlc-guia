@@ -30,7 +30,7 @@ Sesión 1, segunda mitad. Todo el equipo.
 ### 1. Crear el repositorio del equipo
 
 1. Una persona del equipo abre la plantilla de su app (el lab tiene el botón) y pulsa **Use this template → Create a new repository**: dueño, su propia cuenta; nombre `sdlc-<app>-equipo-<n>`, por ejemplo `sdlc-vampi-equipo-3`; visibilidad **Public**.
-2. En **Settings → Collaborators → Add people** invita al resto del equipo. Cada persona acepta la invitación que le llega por correo o en https://github.com/notifications.
+2. En **Settings → Collaborators → Add people** invita al resto del equipo y al profesor (`natefedez-tec`). Cada persona acepta la invitación que le llega por correo o en https://github.com/notifications.
 3. En **Settings → Pages**, en «Source», eligen **GitHub Actions**.
 4. Pegan el enlace del repositorio en la misión 0 del lab.
 
