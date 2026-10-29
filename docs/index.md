@@ -7,6 +7,9 @@ permalink: /
 # Laboratorio SDLC Seguro
 {: .no_toc }
 
+**Empiecen aquí: [Lab de misiones](https://ic8071-sdlc-2026s2.github.io/sdlc-guia/lab/).** El lab los guía paso a paso y verifica su repositorio. Esta guía tiene el detalle de cada fase.
+{: .importante }
+
 IC-8071 Seguridad del Software · Instituto Tecnológico de Costa Rica
 {: .fs-5 .fw-300 }
 

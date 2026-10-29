@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SDLC Lab IC-8071</title>
+<style>
+/* Layout: consola de una columna (máx. 1120 px). Arriba, la ruta de misiones por sesión;
+   abajo, la misión activa: pasos guiados a la izquierda y la verificación del repositorio fija a la derecha. */
+:root{
+  --azul:#0F6CBD; --azul-2:#115EA3; --azul-suave:#EFF6FC; --azul-borde:#B4D6FA; --sobre-azul:#FFFFFF;
+  --txt:#242424; --txt-2:#5C5C5C; --txt-3:#707070;
+  --bg:#FFFFFF; --bg-2:#FAF9F8; --bg-3:#F3F2F1; --bd:#E1DFDD; --bd-2:#C8C6C4;
+  --nav:#1F1F1F; --nav-txt:#F3F2F1; --nav-txt-2:#BDBDBD; --nav-bd:#4A4A4A;
+  --ok:#0E700E; --ok-bg:#F1FAF1; --ok-bd:#9FD89F; --err:#A4262C; --err-bg:#FDF3F4; --aviso:#8A3707; --aviso-bg:#FFF4CE;
+  --s:#C4314B; --t:#CA5010; --r:#8764B8; --i:#0F6CBD; --d:#986F0B; --e:#107C10; --otra:#69797E;
+  --calor-1:#DFF6DD; --calor-2:#FFF4CE; --calor-3:#FDE7E9;
+  --codigo-bg:#F7F7F7;
+  --f-ui:'Segoe UI','Segoe UI Web',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --f-mono:'Cascadia Code','Cascadia Mono',Consolas,ui-monospace,'SF Mono',Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --azul:#479EF5; --azul-2:#62ABF5; --azul-suave:#0C2B4A; --azul-borde:#1F4E80; --sobre-azul:#0A0A0A;
+    --txt:#F3F2F1; --txt-2:#C8C6C4; --txt-3:#ADABA9;
+    --bg:#1B1A19; --bg-2:#222120; --bg-3:#2C2B2A; --bd:#3B3A39; --bd-2:#4A4846;
+    --nav:#111110; --nav-txt:#F3F2F1; --nav-txt-2:#A19F9D; --nav-bd:#3B3A39;
+    --ok:#6CCB5F; --ok-bg:#132A13; --ok-bd:#2E5E2B; --err:#F1707B; --err-bg:#3A161A; --aviso:#FCE100; --aviso-bg:#3A3208;
+    --s:#EE6B7F; --t:#F08A4B; --r:#B59BE0; --i:#62ABF5; --d:#E0B53A; --e:#6CCB5F; --otra:#A0AEB2;
+    --calor-1:#173A17; --calor-2:#3A3208; --calor-3:#3A161A;
+    --codigo-bg:#252423;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --azul:#479EF5; --azul-2:#62ABF5; --azul-suave:#0C2B4A; --azul-borde:#1F4E80; --sobre-azul:#0A0A0A;
+  --txt:#F3F2F1; --txt-2:#C8C6C4; --txt-3:#ADABA9;
+  --bg:#1B1A19; --bg-2:#222120; --bg-3:#2C2B2A; --bd:#3B3A39; --bd-2:#4A4846;
+  --nav:#111110; --nav-txt:#F3F2F1; --nav-txt-2:#A19F9D; --nav-bd:#3B3A39;
+  --ok:#6CCB5F; --ok-bg:#132A13; --ok-bd:#2E5E2B; --err:#F1707B; --err-bg:#3A161A; --aviso:#FCE100; --aviso-bg:#3A3208;
+  --s:#EE6B7F; --t:#F08A4B; --r:#B59BE0; --i:#62ABF5; --d:#E0B53A; --e:#6CCB5F; --otra:#A0AEB2;
+  --calor-1:#173A17; --calor-2:#3A3208; --calor-3:#3A161A;
+  --codigo-bg:#252423;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--bg);color:var(--txt);font:14px/1.5 var(--f-ui)}
+a{color:var(--azul)}
+:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25;text-wrap:balance}
+h1{font-size:24px;font-weight:600}
+h2{font-size:15px;font-weight:600}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:12.5px}
+input,select,textarea,button{font:inherit;color:inherit}
+input[type=text],input[type=number],select{background:var(--bg);color:var(--txt);border:1px solid var(--bd-2);border-radius:4px;padding:6px 9px;min-width:0;width:100%}
+input::placeholder{color:var(--txt-3)}
+.ceja{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--txt-2);font-weight:600}
+.p-inst{color:var(--txt-2);font-size:13px;max-width:72ch}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--nav)}
+.banda{background:var(--nav);color:var(--nav-txt)}
+.banda-in{max-width:1120px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px}
+.marca{font-weight:600}
+.marca span{color:var(--nav-txt-2);font-weight:400}
+.b-equipo{border:1px solid var(--nav-bd);border-radius:3px;padding:1px 8px;font-size:12px}
+.b-xp{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--nav-txt-2)}
+.b-xp b{color:#FFB900;font-size:14px}
+.b-bt{background:transparent;border:1px solid var(--nav-bd);color:var(--nav-txt);border-radius:3px;padding:3px 10px;font-size:12px;cursor:pointer;text-decoration:none}
+.b-bt:hover{background:#2B2B2B}
+.pagina{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 56px;display:flex;flex-direction:column;gap:20px}
+
+.bt{font-weight:600;font-size:13px;border-radius:4px;border:1px solid var(--azul);background:var(--azul);color:var(--sobre-azul);padding:7px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.bt:hover{background:var(--azul-2);border-color:var(--azul-2)}
+.bt.sec{background:var(--bg);color:var(--azul)}
+.bt.sec:hover{background:var(--azul-suave)}
+.bt.peq{font-size:12px;padding:4px 10px}
+.bt[disabled]{opacity:.5;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--bd-2);background:var(--bg);color:var(--txt);border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer}
+.chip:hover{border-color:var(--azul)}
+.chip[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:var(--sobre-azul);font-weight:600}
+.github{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);background:var(--bg-3);border:1px solid var(--bd-2);border-radius:3px;padding:1px 6px}
+.fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fila > input{flex:1 1 260px}
+.aviso{border-radius:6px;background:var(--aviso-bg);padding:10px 12px;font-size:13px}
+
+/* Ruta */
+.ruta{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.sesion{flex:1 0 auto;min-width:150px;border:1px solid var(--bd);border-radius:6px;background:var(--bg-2);padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px}
+.sesion h3{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--txt-2)}
+.nodos{display:flex;gap:6px}
+.nodo{display:flex;flex-direction:column;align-items:center;gap:4px;width:64px;background:none;border:0;padding:2px;cursor:pointer;color:var(--txt);text-align:center}
+.nodo .circ{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;border:2px solid var(--bd-2);background:var(--bg);font-variant-numeric:tabular-nums}
+.nodo .lbl{font-size:11px;line-height:1.2;color:var(--txt-2)}
+.nodo.hecha .circ{background:var(--ok);border-color:var(--ok);color:var(--bg)}
+.nodo.ahora .circ{border-color:var(--azul);color:var(--azul)}
+.nodo[aria-current="true"] .circ{box-shadow:0 0 0 3px var(--azul-borde)}
+.nodo[aria-current="true"] .lbl{color:var(--txt);font-weight:600}
+
+/* Misión */
+.m-cab{display:flex;gap:14px;align-items:flex-start}
+.m-num{flex:none;width:44px;height:44px;border-radius:8px;background:var(--nav);color:var(--nav-txt);display:grid;place-items:center;font-size:20px;font-weight:700}
+.m-meta{color:var(--txt-2);margin-top:2px;max-width:70ch}
+.m-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.pasos{display:flex;flex-direction:column;gap:12px;min-width:0}
+.paso{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;border:1px solid var(--bd);border-radius:6px;padding:14px 16px;background:var(--bg)}
+.paso.ok{border-color:var(--ok-bd)}
+.p-num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--bg-3);color:var(--txt-2)}
+.paso.ok .p-num{background:var(--ok);color:var(--bg)}
+.p-cuerpo{display:flex;flex-direction:column;gap:10px;min-width:0}
+.p-cuerpo > .bt,.p-cuerpo > .chip,.p-cuerpo > a.bt{align-self:flex-start}
+.p-tit{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.p-falta{font-size:12.5px;color:var(--aviso);font-weight:600}
+.paso.ok .p-falta{color:var(--ok)}
+.check{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);border:1px solid var(--bd);border-radius:6px;background:var(--bg-2);padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.anillo{display:flex;align-items:center;gap:12px}
+.anillo svg{flex:none}
+.anillo .pct{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.criterios{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;font-size:13px}
+.criterios li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:6px;align-items:baseline}
+.criterios .ic{font-weight:700;color:var(--txt-3)}
+.criterios li.ok .ic{color:var(--ok)}
+.criterios li:not(.ok){color:var(--txt-2)}
+.criterios small{display:block;color:var(--txt-3);font-size:11.5px}
+.criterios .grupo{display:block;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--txt-2);font-weight:700;margin-top:4px}
+.premio{border-radius:6px;background:var(--ok-bg);border:1px solid var(--ok-bd);padding:12px;display:flex;flex-direction:column;gap:6px}
+.premio b{color:var(--ok)}
+.sello{font-size:11.5px;color:var(--txt-3)}
+details.problemas{border:1px solid var(--bd);border-radius:6px;background:var(--bg-2);padding:10px 14px}
+details.problemas summary{cursor:pointer;font-weight:600}
+details.problemas ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+details.problemas b{font-weight:600}
+
+/* Piezas */
+.mini-pasos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.mini{border:1px solid var(--bd);border-radius:6px;padding:10px 12px;background:var(--bg-2);display:flex;flex-direction:column;gap:6px;font-size:13px;min-width:0}
+.mini .mi-n{font-size:11px;font-weight:700;color:var(--txt-2);letter-spacing:.06em;text-transform:uppercase}
+.mini > .bt,.mini > a.bt{align-self:flex-start}
+.ruta-gh{font-family:var(--f-mono);font-size:12px;background:var(--codigo-bg);border-radius:3px;padding:1px 5px;overflow-wrap:anywhere}
+.cmd{display:flex;align-items:center;gap:6px;background:var(--codigo-bg);border:1px solid var(--bd);border-radius:4px;padding:4px 4px 4px 10px;min-width:0}
+.cmd code{flex:1;min-width:0;overflow-x:auto;white-space:pre;font-size:12px}
+.cmd button{flex:none;border:1px solid var(--bd-2);background:var(--bg);border-radius:3px;font-size:11px;padding:2px 8px;cursor:pointer;color:var(--txt-2)}
+.resultado{font-size:13px;border-radius:4px;padding:8px 10px;background:var(--bg-3)}
+.resultado.ok{background:var(--ok-bg);color:var(--ok);font-weight:600}
+.resultado.mal{background:var(--aviso-bg);color:var(--txt)}
+.seg{display:inline-flex;border:1px solid var(--bd-2);border-radius:4px;overflow:hidden}
+.seg button{border:0;border-right:1px solid var(--bd-2);background:var(--bg);padding:6px 14px;cursor:pointer;font-weight:600;font-variant-numeric:tabular-nums}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--azul);color:var(--sobre-azul)}
+.personas{display:flex;flex-direction:column;gap:6px}
+.personas > .bt{align-self:flex-start}
+.persona{display:grid;grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 32px;gap:6px;align-items:center}
+.persona .n{font-size:12px;color:var(--txt-2);font-variant-numeric:tabular-nums;text-align:center}
+.quitar{border:1px solid var(--bd-2);background:var(--bg);border-radius:4px;height:32px;cursor:pointer;color:var(--txt-2)}
+.quitar:hover{color:var(--err);border-color:var(--err)}
+.apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.app{display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid var(--bd);border-radius:6px;background:var(--bg);padding:12px;cursor:pointer}
+.app[aria-pressed="true"]{border-color:var(--azul);box-shadow:inset 0 0 0 1px var(--azul);background:var(--azul-suave)}
+.a-cab{display:flex;align-items:center;gap:10px}
+.a-logo{width:36px;height:36px;border-radius:6px;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--nav);color:var(--nav-txt);flex:none}
+.a-tipo{font-size:12px;color:var(--txt-2)}
+.a-stack{display:flex;flex-wrap:wrap;gap:4px}
+.a-stack span{font-size:11px;border:1px solid var(--bd);border-radius:3px;padding:0 5px;color:var(--txt-2)}
+.tabla-env{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;width:100%}
+th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
+.roles{min-width:560px}
+.roles td:first-child{white-space:nowrap;font-weight:600;font-size:12.5px}
+.roles select{min-width:110px}
+.roles select.mal{border-color:var(--err);color:var(--err)}
+.pred{display:grid;grid-template-columns:22px minmax(0,1.2fr) minmax(0,2fr);gap:8px;align-items:center}
+.pred .n{font-weight:700;color:var(--txt-2);text-align:center}
+.vacio{border:1px dashed var(--bd-2);border-radius:6px;padding:16px;text-align:center;color:var(--txt-2);font-size:13px}
+
+.stride{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.st{border:1px solid var(--bd);border-radius:6px;padding:8px;background:var(--bg);display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--txt-3)}
+.st .L{font-size:26px;font-weight:700;line-height:1}
+.st .nom{font-size:12px;font-weight:600;color:var(--txt-2)}
+.st .des{font-size:11px;color:var(--txt-2);line-height:1.3}
+.st.on{border-color:currentColor}
+.st.on .nom,.st.on .des{color:var(--txt)}
+.st.on[data-k="S"]{color:var(--s)} .st.on[data-k="T"]{color:var(--t)} .st.on[data-k="R"]{color:var(--r)}
+.st.on[data-k="I"]{color:var(--i)} .st.on[data-k="D"]{color:var(--d)} .st.on[data-k="E"]{color:var(--e)}
+.form-caso{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 14px}
+.campo{display:flex;flex-direction:column;gap:4px;min-width:0}
+.campo.ancho{grid-column:1/-1}
+.campo label,.campo .lab{font-size:12px;font-weight:600;color:var(--txt-2)}
+.campo .ok{color:var(--ok)}
+.gherkin{display:flex;flex-direction:column;gap:6px}
+.g{display:grid;grid-template-columns:78px minmax(0,1fr);gap:8px;align-items:center}
+.g span{font-family:var(--f-mono);font-size:12px;font-weight:700;border-radius:3px;padding:6px 0;text-align:center}
+.g.dado span{background:var(--azul-suave);color:var(--azul)}
+.g.cuando span{background:var(--aviso-bg);color:var(--aviso)}
+.g.entonces span{background:var(--err-bg);color:var(--err)}
+.cat-chip[aria-pressed="true"]{color:var(--bg)}
+.cat-chip[data-k="S"][aria-pressed="true"]{background:var(--s);border-color:var(--s)}
+.cat-chip[data-k="T"][aria-pressed="true"]{background:var(--t);border-color:var(--t)}
+.cat-chip[data-k="R"][aria-pressed="true"]{background:var(--r);border-color:var(--r)}
+.cat-chip[data-k="I"][aria-pressed="true"]{background:var(--i);border-color:var(--i)}
+.cat-chip[data-k="D"][aria-pressed="true"]{background:var(--d);border-color:var(--d)}
+.cat-chip[data-k="E"][aria-pressed="true"]{background:var(--e);border-color:var(--e)}
+.cat-chip[data-k="X"][aria-pressed="true"],.cat-chip[data-k="Y"][aria-pressed="true"]{background:var(--otra);border-color:var(--otra)}
+.ejemplo{border:1px dashed var(--bd-2);border-radius:6px;padding:10px 12px;background:var(--bg-2);font-size:13px;display:flex;flex-direction:column;gap:6px}
+.casos{display:flex;flex-direction:column;gap:8px}
+.caso{border:1px solid var(--bd);border-left:4px solid var(--otra);border-radius:5px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.caso[data-k="S"]{border-left-color:var(--s)} .caso[data-k="T"]{border-left-color:var(--t)} .caso[data-k="R"]{border-left-color:var(--r)}
+.caso[data-k="I"]{border-left-color:var(--i)} .caso[data-k="D"]{border-left-color:var(--d)} .caso[data-k="E"]{border-left-color:var(--e)}
+.c-cab{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.c-cab b{font-size:14px}
+.c-cat{font-size:11px;font-weight:700;border-radius:3px;padding:0 6px;background:var(--bg-3)}
+.c-comp{font-family:var(--f-mono);font-size:12px;color:var(--txt-2);overflow-wrap:anywhere}
+.c-g{font-size:12.5px;color:var(--txt-2);display:flex;flex-direction:column;gap:1px}
+.c-g b{font-family:var(--f-mono);font-size:11.5px;color:var(--txt)}
+.c-acc{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.enviado{font-size:12px;color:var(--ok);font-weight:600}
+.sug{display:flex;flex-wrap:wrap;gap:6px}
+.matriz{min-width:760px}
+.matriz td input,.matriz td select{padding:4px 6px}
+.matriz td.r{font-weight:700;text-align:center;font-variant-numeric:tabular-nums;border-radius:3px}
+.matriz td.c1{background:var(--calor-1)} .matriz td.c2{background:var(--calor-2)} .matriz td.c3{background:var(--calor-3)}
+.calor{display:grid;grid-template-columns:auto repeat(3,64px);grid-template-rows:repeat(3,52px) auto;gap:4px;align-items:center}
+.calor .c{border-radius:4px;display:flex;flex-wrap:wrap;gap:2px;align-content:center;justify-content:center;padding:3px;font-size:11px;font-weight:700;font-family:var(--f-mono)}
+.calor .c1{background:var(--calor-1)} .calor .c2{background:var(--calor-2)} .calor .c3{background:var(--calor-3)}
+.calor .eje{font-size:11px;color:var(--txt-2);text-align:center}
+.reloj{font-family:var(--f-mono);font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.reloj.fin{color:var(--err)}
+.respaldo{border:1px solid var(--bd);border-radius:6px;padding:14px 16px;background:var(--bg-2);display:flex;flex-direction:column;gap:8px}
+.respaldo textarea{width:100%;min-height:120px;font-family:var(--f-mono);font-size:12px;background:var(--bg);color:var(--txt);border:1px solid var(--bd-2);border-radius:4px;padding:8px}
+
+@media (max-width:900px){ .m-grid{grid-template-columns:1fr} .check{position:static;order:-1} }
+@media (max-width:640px){
+  .stride{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .form-caso{grid-template-columns:1fr}
+  .persona{grid-template-columns:22px minmax(0,1fr) 32px}
+  .persona input.gh{grid-column:2/3}
+  .pred{grid-template-columns:22px minmax(0,1fr)}
+  .pred .chips{grid-column:2/3}
+  .g{grid-template-columns:70px minmax(0,1fr)}
+}
+@media (prefers-reduced-motion: no-preference){ .st,.paso,.nodo .circ{transition:border-color .15s,background-color .15s,color .15s} }
+</style>
+</head>
+<body>
+<header class="banda">
+  <div class="banda-in">
+    <div class="marca">SDLC Lab <span>· IC-8071 · Seguridad del Software</span></div>
+    <span class="b-equipo" id="b-equipo">Sin equipo todavía</span>
+    <span class="b-xp"><b id="b-xp">0</b> XP</span>
+    <a class="b-bt" href="../" target="_blank" rel="noopener">Guía</a>
+    <button class="b-bt" type="button" id="b-respaldo">Respaldo</button>
+  </div>
+</header>
+<main class="pagina">
+  <nav class="ruta" id="ruta" aria-label="Ruta de misiones"></nav>
+  <section class="respaldo" id="respaldo" hidden aria-labelledby="t-resp">
+    <h2 id="t-resp">Respaldo del equipo</h2>
+    <p class="p-inst">El avance del lab queda en este navegador. Copien este texto y guárdenlo; para seguir en otra computadora, péguenlo aquí y pulsen «Restaurar». Lo que está en su repositorio de GitHub no se pierde nunca.</p>
+    <textarea id="resp-txt" spellcheck="false" aria-label="Texto del respaldo"></textarea>
+    <div class="fila">
+      <button class="bt" type="button" id="resp-copiar">Copiar</button>
+      <button class="bt sec" type="button" id="resp-restaurar">Restaurar</button>
+      <button class="bt sec" type="button" id="resp-cerrar">Cerrar</button>
+      <button class="bt sec" type="button" id="resp-borrar">Empezar de cero</button>
+      <span class="p-inst" id="resp-msg" role="status"></span>
+    </div>
+  </section>
+  <div id="vista"></div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var ORG = "ic8071-sdlc-2026s2";
+  var GUIA = "https://" + ORG + ".github.io/sdlc-guia/";
+
+  var APPS = {
+    "juice-shop": { n: "OWASP Juice Shop", tipo: "Tienda en línea", logo: "JS", stack: ["Node.js", "TypeScript", "Angular", "SQLite"], puerto: 3000, cmd: "bash lab/app.sh rapido",
+      tip: "La tienda abre en la página principal. Regístrense y hagan una compra.", ext: "ts", comps: [
+      "POST /rest/user/login · Iniciar sesión", "POST /api/Users · Registro", "GET /api/Users · Lista de usuarios (administración)",
+      "GET /rest/products/search?q= · Búsqueda de productos", "GET /api/Products · Listado de productos", "GET/POST /rest/basket/{id} · Canasta",
+      "POST /api/Feedbacks · Feedback", "POST /rest/user/reset-password · Restablecer contraseña", "POST /api/Cards · Tarjetas de pago",
+      "POST /api/Addresses · Direcciones", "POST /b2b/v2/orders · Pedidos B2B y carga de XML", "GET /rest/admin/application-configuration · Configuración pública",
+      "GET /metrics · Métricas", "Pantalla de perfil · Foto de perfil por URL", "Pantalla de soporte · Chat y quejas"] },
+    "pygoat": { n: "OWASP PyGoat", tipo: "Plataforma de aprendizaje", logo: "PG", stack: ["Python", "Django", "SQLite"], puerto: 8000, cmd: "bash lab/app.sh levantar",
+      tip: "Abre en /login/. Creen una cuenta y abran una lección.", ext: "py", comps: [
+      "/login/ · Inicio de sesión", "/register · Registro", "/password_reset/ · Restablecer contraseña", "/password_change/ · Cambio de contraseña",
+      "/admin/ · Administración de Django", "/scoring/dashboard/ · Puntaje y logros", "GET /scoring/scores/ · Puntajes en JSON",
+      "PUT /challenge/<nombre> · Enviar una bandera", "GET /challenge/start-lab/<lab>/ · Arrancar un laboratorio",
+      "POST /challenge/custom-labs/create/ · Crear un laboratorio personalizado", "POST /challenge/custom-labs/delete/<id>/ · Borrar un laboratorio personalizado",
+      "GET /auth/verify/ · Verificar quién es dueño de un laboratorio"] },
+    "vampi": { n: "VAmPI", tipo: "API REST", logo: "VA", stack: ["Python", "Flask", "Connexion", "SQLite"], puerto: 5000, cmd: "bash lab/app.sh levantar",
+      tip: "No tiene pantallas: abran /ui/ y prueben la API desde el Swagger.", ext: "py", comps: [
+      "POST /users/v1/login · Inicio de sesión con JWT", "POST /users/v1/register · Registro", "GET /users/v1 · Lista de usuarios",
+      "GET /users/v1/_debug · Detalle de todos los usuarios", "GET /users/v1/{username} · Usuario por nombre", "DELETE /users/v1/{username} · Borrar un usuario",
+      "PUT /users/v1/{username}/email · Cambiar el correo", "PUT /users/v1/{username}/password · Cambiar la contraseña", "GET /me · Datos del usuario del token",
+      "GET /books/v1 · Lista de libros", "POST /books/v1 · Agregar un libro con su secreto", "GET /books/v1/{book_title} · Un libro con su secreto"] },
+    "railsgoat": { n: "OWASP RailsGoat", tipo: "Portal de RR. HH. y nómina", logo: "RG", stack: ["Ruby", "Rails", "SQLite"], puerto: 3000, cmd: "bash lab/app.sh levantar",
+      tip: "Entren con una de las cuentas de prueba del mapa de la app (mapa-de-la-app.md).", ext: "rb", comps: [
+      "GET /login · Inicio de sesión", "POST /users · Registro", "GET,POST /password_resets · Restablecer contraseña", "PATCH /users/:id · Ajustes de cuenta",
+      "GET /users/:id/work_info · Información laboral", "GET /users/:id/pay · Salario y depósito", "POST /users/:id/decrypted_bank_acct_num · Cuenta bancaria",
+      "GET /users/:id/retirement · Plan de retiro", "GET /users/:id/messages · Mensajes", "POST /upload y GET /download · Formularios de beneficios",
+      "GET /admin/:admin_id/get_all_users · Administración de empleados", "POST /admin/:admin_id/delete_user · Borrar un empleado", "GET /api/v1/users · API móvil"] }
+  };
+  var STRIDE = [
+    { k: "S", n: "Suplantación", d: "Hacerse pasar por otra persona", form: "S · Suplantación" },
+    { k: "T", n: "Manipulación", d: "Alterar datos o peticiones", form: "T · Manipulación" },
+    { k: "R", n: "Repudio", d: "Negar lo que hizo, sin rastro", form: "R · Repudio" },
+    { k: "I", n: "Divulgación", d: "Ver lo que no le toca", form: "I · Divulgación de información" },
+    { k: "D", n: "Denegación de servicio", d: "Agotar o detener la app", form: "D · Denegación de servicio" },
+    { k: "E", n: "Elevación de privilegios", d: "Hacer lo que su rol no permite", form: "E · Elevación de privilegios" }
+  ];
+  var OTRAS_CAT = [{ k: "X", n: "Cadena de suministro", form: "Cadena de suministro" }, { k: "Y", n: "Configuración", form: "Configuración" }];
+  var CATS = STRIDE.concat(OTRAS_CAT);
+  var NUCLEO = [
+    { c: "CWE-307", t: "Login sin bloqueo de intentos", asvs: "6.3.1", cap: "V6 · Autenticación" },
+    { c: "CWE-89", t: "Inyección SQL", asvs: "1.2.4", cap: "V1 · Codificación y sanitización" },
+    { c: "CWE-778", t: "Operaciones críticas sin bitácora", asvs: "", cap: "V16 · Bitácoras de seguridad y manejo de errores", nivel2: true },
+    { c: "CWE-639", t: "Recurso ajeno por identificador (IDOR)", asvs: "8.2.2", cap: "V8 · Autorización" },
+    { c: "CWE-770", t: "Sin límite de peticiones", asvs: "2.4.1", cap: "V2 · Validación y lógica de negocio", nivel2: true },
+    { c: "CWE-862", t: "Administración sin verificar el rol", asvs: "8.2.1", cap: "V8 · Autorización" },
+    { c: "CWE-798", t: "Secreto escrito en el código", asvs: "13.3.1", cap: "V13 · Configuración", nivel2: true },
+    { c: "CWE-1395", t: "Dependencia con vulnerabilidad conocida", asvs: "15.2.1", cap: "V15 · Codificación y arquitectura seguras" },
+    { c: "CWE-1004", t: "Cookie sin HttpOnly y cabeceras ausentes", asvs: "3.3.4", cap: "V3 · Seguridad del frontend web", nivel2: true }
+  ];
+  var CAPITULOS = ["V1 · Codificación y sanitización", "V2 · Validación y lógica de negocio", "V3 · Seguridad del frontend web", "V4 · API y servicios web",
+    "V5 · Manejo de archivos", "V6 · Autenticación", "V7 · Gestión de sesiones", "V8 · Autorización", "V9 · Tokens autocontenidos", "V10 · OAuth y OIDC",
+    "V11 · Criptografía", "V12 · Comunicación segura", "V13 · Configuración", "V14 · Protección de datos", "V15 · Codificación y arquitectura seguras",
+    "V16 · Bitácoras de seguridad y manejo de errores", "V17 · WebRTC"];
+  var TECNICAS = ["Modelo de amenazas", "SAST", "Dependencias", "DAST", "Pruebas de abuso"];
+  var ROLES = ["Arquitectura", "AppSec", "DevSecOps", "Equipo rojo"];
+  var SESIONES = [{ s: 2, t: "Sesión 2 · Fases 1 y 2" }, { s: 3, t: "Sesión 3 · Fase 3" }, { s: 4, t: "Sesión 4 · Fase 4" }, { s: 5, t: "Sesión 5 · Fase 5" }];
+  var ACTORES = ["Visitante anónimo", "Usuario registrado", "Otro usuario del sistema", "Administrador", "Integración externa"];
+  var TRATAMIENTOS = ["Corregir", "Mitigar", "Aceptar", "Transferir"];
+
+  /* ============ Estado ============ */
+  var CLAVE = "sdlc-lab-ic8071";
+  function borradorCaso() { return { titulo: "", actor: "", objetivo: "", cat: "", comp: "", carta: "", cwe: "", dado: "", cuando: "", entonces: "" }; }
+  function borradorReq() { return { id: "", cap: "", enunciado: "", casos: "", dado: "", cuando: "", entonces: "" }; }
+  function estadoVacio() {
+    return {
+      vista: null, equipo: null,
+      personas: [{ nombre: "", gh: "" }, { nombre: "", gh: "" }, { nombre: "", gh: "" }, { nombre: "", gh: "" }],
+      app: null, roles: {}, repo: "", taller: false,
+      pred: [{ w: "", t: "" }, { w: "", t: "" }, { w: "", t: "" }],
+      cartas: false, casos: [], borrador: borradorCaso(), reqs: [], borradorReq: borradorReq(),
+      matriz: [], remoto: null
+    };
+  }
+  var S = estadoVacio();
+  try { var g = localStorage.getItem(CLAVE); if (g) { var d0 = JSON.parse(g); if (d0 && typeof d0 === "object") S = Object.assign(estadoVacio(), d0); } } catch (e) { /* sin almacenamiento */ }
+  function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch (e) { /* sin almacenamiento */ } }
+
+  /* ============ Utilidades ============ */
+  function el(tag, attrs, hijos) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (v == null || v === false) return;
+      if (k === "class") e.className = v;
+      else if (k === "text") e.textContent = v;
+      else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? "" : v);
+    });
+    (hijos || []).forEach(function (h) { if (h != null) e.appendChild(typeof h === "string" ? document.createTextNode(h) : h); });
+    return e;
+  }
+  function copiar(txt, boton) {
+    var antes = boton.textContent;
+    function listo(msg) { boton.textContent = msg; setTimeout(function () { boton.textContent = antes; }, 1600); }
+    try { navigator.clipboard.writeText(txt).then(function () { listo("Copiado"); }, function () { listo("Selecciónenlo y cópienlo"); }); }
+    catch (e) { listo("Selecciónenlo y cópienlo"); }
+  }
+  function cmd(txt) {
+    return el("div", { class: "cmd" }, [el("code", { text: txt }), el("button", { type: "button", onclick: function (ev) { copiar(txt, ev.currentTarget); } }, ["Copiar"])]);
+  }
+  function personasValidas() { return S.personas.filter(function (p) { return p.nombre.trim(); }); }
+  function ghValido(u) { return /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/.test((u || "").trim().replace(/^@/, "")); }
+  function nombreRepo() { return S.app && S.equipo ? "sdlc-" + S.app + "-equipo-" + S.equipo : "sdlc-<app>-equipo-<n>"; }
+  function repoPartes() {
+    var t = (S.repo || "").trim().replace(/\.git$/, "").replace(/\/+$/, "");
+    var m = t.match(/^(?:https?:\/\/github\.com\/)?([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)$/);
+    return m ? { owner: m[1], repo: m[2] } : null;
+  }
+  function gh(ruta) { var r = repoPartes(); return r ? "https://github.com/" + r.owner + "/" + r.repo + (ruta ? "/" + ruta : "") : null; }
+  function enlace(txt, url, sec) {
+    return url ? el("a", { class: "bt peq" + (sec ? " sec" : ""), href: url, target: "_blank", rel: "noopener" }, [txt]) : el("span", { class: "p-falta", text: "Registren su repositorio en la misión 0." });
+  }
+  function urlIssue(plantilla, campos) {
+    var base = gh("issues/new"); if (!base) return null;
+    var q = Object.assign({ template: plantilla }, campos);
+    return base + "?" + Object.keys(q).map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(q[k] || ""); }).join("&");
+  }
+  function anillo(pct) {
+    var r = 24, c = 2 * Math.PI * r, off = c * (1 - pct / 100);
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "60"); svg.setAttribute("height", "60"); svg.setAttribute("viewBox", "0 0 60 60"); svg.setAttribute("aria-hidden", "true");
+    svg.innerHTML = '<circle cx="30" cy="30" r="' + r + '" fill="none" stroke="var(--bd)" stroke-width="7"/>' +
+      '<circle cx="30" cy="30" r="' + r + '" fill="none" stroke="' + (pct >= 100 ? "var(--ok)" : "var(--azul)") + '" stroke-width="7" stroke-linecap="round" ' +
+      'stroke-dasharray="' + c.toFixed(2) + '" stroke-dashoffset="' + off.toFixed(2) + '" transform="rotate(-90 30 30)"/>';
+    return svg;
+  }
+
+  /* ============ Estado del repositorio (estado.json) ============ */
+  var cargando = false;
+  function checkRemoto(id) {
+    if (!S.remoto || !S.remoto.fases) return null;
+    for (var i = 0; i < S.remoto.fases.length; i++) {
+      var cs = S.remoto.fases[i].checks || [];
+      for (var j = 0; j < cs.length; j++) if (cs[j].id === id) return cs[j];
+    }
+    return null;
+  }
+  function actualizarRemoto(despues) {
+    var r = repoPartes();
+    if (!r || cargando) return;
+    cargando = true;
+    var url = "https://" + r.owner.toLowerCase() + ".github.io/" + r.repo + "/estado.json?t=" + Date.now();
+    var ctl = ("AbortController" in window) ? new AbortController() : null;
+    var to = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
+    fetch(url, { cache: "no-store", signal: ctl ? ctl.signal : undefined })
+      .then(function (res) { if (!res.ok) throw new Error(String(res.status)); return res.json(); })
+      .then(function (d) {
+        if (!d || !Array.isArray(d.fases)) throw new Error("formato");
+        S.remoto = { fases: d.fases, generado: d.generado || "", leido: new Date().toISOString(), error: null };
+      })
+      .catch(function () { S.remoto = Object.assign({}, S.remoto || {}, { error: "sin-estado", leido: new Date().toISOString() }); })
+      .then(function () { clearTimeout(to); cargando = false; guardar(); if (despues) despues(); });
+  }
+  function hace(iso) {
+    if (!iso) return "";
+    var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    return m < 1 ? "hace un momento" : m < 60 ? "hace " + m + " min" : "hace " + Math.round(m / 60) + " h";
+  }
+
+  /* ============ Validaciones del lab ============ */
+  function rolesDisponibles() { return personasValidas().length >= 5 ? ROLES.concat(["Relatoría"]) : ROLES; }
+  function problemasRoles() {
+    var ps = personasValidas(), R = rolesDisponibles(), prob = [];
+    if (ps.length < 4) return ["Primero completen el equipo"];
+    var porPersona = {};
+    SESIONES.forEach(function (se) {
+      var asig = S.roles[se.s] || {}, vistos = {};
+      R.forEach(function (rol) {
+        var i = asig[rol];
+        if (i == null || i === "" || !ps[i]) { prob.push(se.t.split(" · ")[0] + ": falta " + rol); return; }
+        if (vistos[i]) prob.push(se.t.split(" · ")[0] + ": " + ps[i].nombre + " tiene dos roles");
+        vistos[i] = 1;
+        porPersona[i] = porPersona[i] || {};
+        if (porPersona[i][rol]) prob.push(ps[i].nombre + " repite " + rol);
+        porPersona[i][rol] = 1;
+      });
+    });
+    return prob;
+  }
+  function equipoOk() { var ps = personasValidas(); return !!S.equipo && ps.length >= 4 && ps.length <= 5 && ps.every(function (p) { return ghValido(p.gh); }); }
+  function predOk() { return S.pred.every(function (p) { return p.w && p.t; }) && new Set(S.pred.map(function (p) { return p.w; })).size === 3; }
+  function casoCompleto(c) {
+    return c.titulo.trim() && c.actor.trim() && c.objetivo.trim() && c.cat && c.comp && c.carta.trim() &&
+      c.dado.trim().length >= 8 && c.cuando.trim().length >= 8 && c.entonces.trim().length >= 8;
+  }
+  function reqCompleto(q) {
+    return /^\d{1,2}\.\d{1,2}\.\d{1,2}$/.test(q.id.trim()) && q.cap && q.enunciado.trim().length >= 12 && /#\d+/.test(q.casos) &&
+      q.dado.trim().length >= 8 && q.cuando.trim().length >= 8 && q.entonces.trim().length >= 8;
+  }
+  function strideCubiertas() { var k = {}; S.casos.forEach(function (c) { if ("STRIDE".indexOf(c.cat) >= 0 && c.cat.length === 1) k[c.cat] = 1; }); return k; }
+
+  /* ============ Misiones ============ */
+  function L(t, url, sec) { return { t: t, url: url, sec: sec }; }
+  var MISIONES = [
+    { id: 0, s: 1, t: "Ingreso", corto: "Ingreso", tp: "Inicio", xp: 100, fase: 0, meta: "Formen el equipo, creen su repositorio y levanten la app.",
+      checks: ["f0.equipo", "f0.ci", "f0.pages"],
+      lab: function () { return [{ t: "Equipo, app y roles completos", ok: equipoOk() && !!S.app && problemasRoles().length === 0 }, { t: "Repositorio registrado en el lab", ok: !!repoPartes() }, { t: "App corriendo en su Codespace", ok: !!S.taller }, { t: "3 predicciones distintas", ok: predOk() }]; },
+      problemas: [
+        ["El usuario de GitHub como enlace o con espacios", "En EQUIPO.md va solo el usuario: mfernandez. Usen el botón «Copiar EQUIPO.md» del paso 4."],
+        ["Pages con «Deploy from a branch»", "Debe ser «GitHub Actions». Si no, el reporte no se publica y el lab no puede leer su estado."],
+        ["El lab dice «todavía no hay estado»", "«Checkpoints» tarda 2 o 3 minutos después de cada cambio. Revisen la pestaña Actions de su repositorio."],
+        ["Juice Shop tarda mucho en levantar", "Usen bash lab/app.sh rapido: descarga la imagen oficial en vez de construirla."],
+        ["El Codespace consume cuota", "Deténganlo al terminar (Codespaces → Stop). Se detiene solo a los 30 minutos sin uso."],
+        ["Una persona no puede editar el repositorio", "Debe aceptar la invitación de colaboradora que le llegó por correo o en github.com/notifications."]] },
+    { id: 1, s: 2, t: "Casos de abuso", corto: "Abuso", tp: "Touchpoint 5", xp: 150, fase: 1, meta: "Piensen como atacantes: 6 escenarios concretos contra su app.",
+      checks: ["f1.casos", "f1.categorias", "f1.gherkin", "f1.cornucopia"],
+      problemas: [
+        ["Crear el issue en blanco", "Usen siempre el botón «Crear el issue en GitHub»: abre el formulario correcto, ya lleno. Un issue en blanco no cuenta."],
+        ["Casos genéricos", "«Un atacante hace inyección SQL» no sirve. Nombren el endpoint, el parámetro y el dato que se pierde."],
+        ["La categoría no viene marcada en GitHub", "Elíjanla en la lista del formulario antes de pulsar «Submit new issue»."],
+        ["No sé qué carta usar", "Cualquier carta de Copi que aplique a su app. Anoten su código, por ejemplo VE5."]] },
+    { id: 2, s: 2, t: "Requerimientos", corto: "Requisitos", tp: "Touchpoint 6", xp: 150, fase: 1, meta: "Por cada caso de abuso, el requerimiento de ASVS 5.0 que lo impide.",
+      checks: ["f1.requerimientos", "f1.trazabilidad"],
+      problemas: [
+        ["Escribir V8.2.2", "El identificador va sin la V: 8.2.2."],
+        ["Citar otro caso en vez del requerimiento", "En el requerimiento, «Casos que mitiga» lleva los números de sus casos de abuso (#3). Y en cada caso de abuso, editen «Requerimientos que lo mitigan» con el número del requerimiento."],
+        ["Requerimientos que no se pueden verificar", "Si no pueden escribir el «Entonces», no es un requerimiento."],
+        ["El requerimiento no es de nivel 1", "Se permiten de nivel 2 solo los de V16, 2.4.1, 3.3.4, 13.3.1 y 11.5.1."]] },
+    { id: 3, s: 2, t: "Modelo de amenazas", corto: "Amenazas", tp: "Touchpoint 2", xp: 150, fase: 2, meta: "El DFD con fronteras de confianza y la matriz de riesgos 3 × 3.",
+      checks: ["f2.dfd", "f2.matriz", "f2.cobertura"],
+      problemas: [
+        ["Rotular en inglés", "El verificador busca la palabra «frontera». Escriban «Frontera de confianza»."],
+        ["Cambiar el nombre o el formato del DFD", "Debe seguir siendo seguridad/fase-2/dfd.drawio.svg."],
+        ["Probabilidad como palabra", "Usen números del 1 al 3. El lab calcula el riesgo P × I por ustedes."],
+        ["Dejar un caso fuera de la matriz", "Todos los casos van, aunque sea con P o I bajos."]] },
+    { id: 4, s: 3, t: "Regla propia", corto: "Regla", tp: "Touchpoint 1", xp: 200, fase: 3, meta: "Semgrep en cada PR y una regla propia que verifica uno de sus requerimientos.",
+      checks: ["f3.workflow", "f3.regla", "f3.pr"],
+      pasos: [
+        { t: "Workflow de PR", d: "En el Codespace, copien el esqueleto y completen los TODO: Semgrep, Gitleaks y Dependency Review.", cmd: "cp lab/workflows/fase3-seguridad-pr.yml .github/workflows/", links: function () { return [L("Ver el esqueleto", gh("blob/main/lab/workflows/fase3-seguridad-pr.yml"), true)]; } },
+        { t: "Su regla de Semgrep", d: "Dos archivos con el mismo nombre en seguridad/fase-3/semgrep/: la regla (.yml) y su prueba. En metadata.requerimiento va el número del issue de requerimiento.", cmd: "semgrep --test seguridad/fase-3/semgrep", links: function () { return [L("Ver el ejemplo", gh("blob/main/seguridad/fase-3/semgrep/README.md"), true), L("Semgrep Playground", "https://semgrep.dev/playground", true)]; } },
+        { t: "Un pull request", d: "Trabajen en una rama y abran un PR: el workflow corre y comenta los hallazgos.", cmd: "git switch -c fase-3 && git add -A && git commit -m \"Fase 3: SAST y regla propia\" && git push -u origin fase-3 && gh pr create --fill" }
+      ],
+      problemas: [
+        ["La prueba y la regla con distinto nombre", "regla.yml y prueba-regla.py no funcionan: deben llamarse igual, por ejemplo sql-armado.yml y sql-armado.py."],
+        ["metadata.requerimiento con un caso de abuso", "Debe ser el número de un issue de requerimiento."],
+        ["Gitleaks encuentra secretos en app/", "Es esperado: la app es vulnerable a propósito. Regístrenlos como hallazgos en la misión 5."]] },
+    { id: 5, s: 3, t: "Secretos y dependencias", corto: "Secretos", tp: "Touchpoint 1", xp: 150, fase: 3, meta: "Dependabot vigilando y los hallazgos de Gitleaks y Trivy clasificados.",
+      checks: ["f3.dependabot"],
+      pasos: [
+        { t: "Dependabot", d: "Creen .github/dependabot.yml con una entrada para app/ y otra para github-actions. Una carpeta por entrada, con directory:.", links: function () { return [L("Guía de la fase 3", GUIA + "fase-3/", true)]; } },
+        { t: "Revisen los hallazgos", d: "En su PR: el resultado de Gitleaks y de Dependency Review. En la pestaña Security: las alertas de Dependabot.", links: function () { return [L("Abrir Security", gh("security"), true), L("Abrir pull requests", gh("pulls"), true)]; } },
+        { t: "Regístrenlos", d: "Un issue de hallazgo por cada uno que se pueda trazar a un caso o requerimiento, con su decisión: corregir, aceptar o falso positivo.", links: function () { return [L("Registrar un hallazgo", urlIssue("3-hallazgo.yml", { title: "[Hallazgo] " }))]; } }
+      ],
+      problemas: [
+        ["Usar directories: en dependabot.yml", "Usen directory:, una entrada por carpeta."],
+        ["Demasiados PR de Dependabot", "Es normal en una app vulnerable. No tienen que integrarlos todos: decidan cuáles con el equipo."]] },
+    { id: 6, s: 3, t: "Endurecer el pipeline", corto: "Pipeline", tp: "Cadena de suministro", xp: 150, fase: 3, meta: "Permisos mínimos, actions fijadas por hash, regla de rama y Scorecard.",
+      checks: ["f3.fijadas", "f3.permisos", "f3.rama", "f3.scorecard"],
+      pasos: [
+        { t: "Fijar cada action por hash", d: "En todos los workflows, también fase0-ci.yml: cambien @v4 por el hash completo y dejen la versión en un comentario. Así sacan el hash:", cmd: "gh api repos/actions/checkout/commits/v4 --jq .sha" },
+        { t: "Permisos mínimos", d: "Cada workflow lleva permissions: en el nivel superior del archivo, con lo mínimo. Cada job pide lo que necesita." },
+        { t: "Regla de rama", d: "Settings → Rules → Rulesets → New branch ruleset: apliquen a main y marquen «Require a pull request before merging». No usen la protección clásica de Branches.", links: function () { return [L("Abrir Rulesets", gh("settings/rules"), true)]; } },
+        { t: "Scorecard", d: "Copien el workflow de Scorecard sin agregarle pasos.", cmd: "cp lab/workflows/scorecard.yml .github/workflows/" }
+      ],
+      problemas: [
+        ["Fijar solo los workflows nuevos", "fase0-ci.yml también usa etiquetas: hay que fijarlo."],
+        ["permissions: solo dentro de los jobs", "También hace falta en el nivel superior del archivo."],
+        ["Desde ahora todo va por PR", "Con la regla de rama, main ya no acepta commits directos: usen ramas y PR."]] },
+    { id: 7, s: 4, t: "Análisis dinámico", corto: "DAST", tp: "Touchpoint 3", xp: 150, fase: 4, meta: "ZAP contra su app levantada en el runner.",
+      checks: ["f4.dast"],
+      pasos: [
+        { t: "Predicción", d: "Antes de correr ZAP, escriban en el issue «Fase 4» qué casos de abuso creen que va a ver ZAP y por qué." },
+        { t: "Workflow de DAST", d: "Copien el esqueleto y completen el paso de ZAP según ZAP_MODO de lab/app.env. No olviden -I.", cmd: "cp lab/workflows/fase4-dast.yml .github/workflows/", links: function () { return [L("Ver lab/app.env", gh("blob/main/lab/app.env"), true), L("Guía de la fase 4", GUIA + "fase-4/", true)]; } },
+        { t: "Lean el reporte", d: "En la corrida del workflow descarguen el artefacto reporte-dast y abran zap.html.", links: function () { return [L("Abrir Actions", gh("actions"), true)]; } }
+      ],
+      problemas: [
+        ["El job queda en rojo por advertencias", "Agreguen -I al comando de ZAP."],
+        ["VAmPI: el reporte sale casi vacío", "En modo api usen -f openapi, la URL de $ZAP_OPENAPI y -O http://localhost:$APP_PUERTO."],
+        ["Copiar el workflow sin fijar sus actions", "f3.fijadas vuelve a fallar: fíjenlas por hash como en la misión 6."]] },
+    { id: 8, s: 4, t: "Pruebas de abuso", corto: "Pruebas", tp: "Touchpoint 4", xp: 200, fase: 4, meta: "Pruebas que fallan contra la app vulnerable y hallazgos trazados.",
+      checks: ["f4.pruebas", "f4.hallazgos"],
+      pasos: [
+        { t: "Escriban las pruebas", d: "Al menos 3 en seguridad/fase-4/pruebas/test_*.py, cada una con @pytest.mark.caso_abuso(N). La prueba afirma el comportamiento seguro: hoy debe fallar.", links: function () { return [L("Ver el ejemplo", gh("blob/main/seguridad/fase-4/pruebas/test_casos_abuso.py"), true)]; } },
+        { t: "Córranlas en el Codespace", d: "Con la app levantada:", cmd: "pytest seguridad/fase-4/pruebas -v" },
+        { t: "Hallazgos trazados", d: "Al menos 4 issues de hallazgo, de al menos 3 herramientas distintas, cada uno con su decisión.", links: function () { return [L("Registrar un hallazgo", urlIssue("3-hallazgo.yml", { title: "[Hallazgo] " }))]; } }
+      ],
+      problemas: [
+        ["La prueba pasa en verde con la app vulnerable", "Está escrita al revés: debe afirmar lo seguro (por ejemplo, 403), no que el ataque funciona."],
+        ["Marcadores mal escritos", "caso_abuso y corregida se escriben exactamente así."],
+        ["Pruebas que dependen de otras", "Cada prueba prepara sus propios datos."]] },
+    { id: 9, s: 5, t: "Ventana de release", corto: "Release", tp: "Touchpoint 7", xp: 300, fase: 5, meta: "Corregir 3 debilidades y publicar una imagen firmada que pase el gate.",
+      checks: ["f5.correcciones", "f5.lineabase", "f5.release", "f5.sbom", "f5.attestation"], reloj: true,
+      pasos: [
+        { t: "Tres correcciones", d: "Por cada una: un PR que corrige app/, su prueba marcada @pytest.mark.corregida en verde y el issue de hallazgo cerrado con la decisión «Corregir»." },
+        { t: "Línea base justificada", d: "Cada hallazgo alto o crítico de Trivy que no corrijan va en seguridad/fase-5/.trivyignore.yaml con su statement.", links: function () { return [L("Ver la línea base", gh("blob/main/seguridad/fase-5/.trivyignore.yaml"), true)]; } },
+        { t: "Workflow de release", d: "Copien el esqueleto y completen los TODO: Trivy como gate, SBOM, firma por digest y attestations.", cmd: "cp lab/workflows/fase5-release.yml .github/workflows/" },
+        { t: "Publiquen la versión", d: "Una etiqueta v1.0.0 dispara el release:", cmd: "git tag v1.0.0 && git push origin v1.0.0", links: function () { return [L("Abrir Releases", gh("releases"), true)]; } }
+      ],
+      problemas: [
+        ["Firmar por etiqueta", "Firmen por digest (sha256:…): la etiqueta puede moverse."],
+        ["Release sin SBOM", "El archivo adjunto debe contener «sbom» en el nombre."],
+        ["Excepciones sin statement", "Cada excepción de la línea base necesita su justificación."],
+        ["Cerrar un hallazgo a mano", "Sin la decisión «Corregir» y su prueba en verde, el gate no lo cuenta."]] },
+    { id: 10, s: 5, t: "Cierre", corto: "Cierre", tp: "Entrega", xp: 100, fase: 5, meta: "La presentación del equipo y la reflexión de cada persona.",
+      checks: ["f5.presentacion"],
+      pasos: [
+        { t: "Presentación", d: "Completen seguridad/fase-5/presentacion.md: 5 a 7 minutos, con la tabla «qué técnica encontró qué». Quiten todos los COMPLETAR.", links: function () { return [L("Editar la presentación", gh("edit/main/seguridad/fase-5/presentacion.md"), true)]; } },
+        { t: "Reflexión individual", d: "Cada persona entrega su reflexión del rol que lideró en TEC Digital, con su propia cuenta." },
+        { t: "Su predicción", d: "Compárenla con lo que encontraron: ¿qué técnica vio cada debilidad?" }
+      ],
+      problemas: [
+        ["Quedó un COMPLETAR", "El checkpoint no pasa mientras quede uno en presentacion.md."],
+        ["La reflexión en el repositorio", "Este semestre va en TEC Digital, no en el repositorio."]] }
+  ];
+
+  function criterios(m) {
+    var lista = [];
+    if (m.lab) m.lab().forEach(function (c) { lista.push({ t: c.t, ok: c.ok, grupo: "En el lab" }); });
+    m.checks.forEach(function (id) {
+      var c = checkRemoto(id);
+      lista.push({ t: c ? c.descripcion : id, ok: !!(c && c.ok), detalle: c && !c.ok ? c.detalle : "", grupo: "En su repositorio" });
+    });
+    return lista;
+  }
+  function misionHecha(m) { return criterios(m).every(function (c) { return c.ok; }); }
+  function misionActual() { for (var i = 0; i < MISIONES.length; i++) if (!misionHecha(MISIONES[i])) return MISIONES[i].id; return 10; }
+  function xpTotal() { return MISIONES.reduce(function (a, m) { return a + (misionHecha(m) ? m.xp : 0); }, 0); }
+
+  /* ============ Banda y ruta ============ */
+  function pintarBanda() {
+    var a = S.app ? APPS[S.app].n : null;
+    document.getElementById("b-equipo").textContent = S.equipo ? "Equipo " + S.equipo + (a ? " · " + a : "") : "Sin equipo todavía";
+    document.getElementById("b-xp").textContent = String(xpTotal());
+  }
+  function ir(id) { S.vista = id; guardar(); pintarTodo(); window.scrollTo({ top: 0 }); }
+  function pintarRuta() {
+    var nav = document.getElementById("ruta"), actual = misionActual();
+    nav.textContent = "";
+    [1, 2, 3, 4, 5].forEach(function (s) {
+      var caja = el("div", { class: "sesion" }, [el("h3", { text: "Sesión " + s })]);
+      var nodos = el("div", { class: "nodos" });
+      MISIONES.filter(function (m) { return m.s === s; }).forEach(function (m) {
+        var hecha = misionHecha(m);
+        nodos.appendChild(el("button", { type: "button", class: "nodo" + (hecha ? " hecha" : m.id === actual ? " ahora" : ""), "aria-current": vista() === m.id ? "true" : "false",
+          title: m.t + (hecha ? " · completada" : m.id === actual ? " · siguiente" : ""), onclick: function () { ir(m.id); } },
+          [el("span", { class: "circ", text: hecha ? "✓" : String(m.id) }), el("span", { class: "lbl", text: m.corto })]));
+      });
+      caja.appendChild(nodos);
+      nav.appendChild(caja);
+    });
+  }
+  function vista() { return S.vista == null ? misionActual() : S.vista; }
+
+  /* ============ Piezas de misión ============ */
+  function cabecera(m) {
+    return el("div", { class: "m-cab" }, [el("div", { class: "m-num", text: String(m.id) }), el("div", null, [
+      el("p", { class: "ceja", text: "Sesión " + m.s + " · " + m.tp + " · " + m.xp + " XP" }), el("h1", { text: m.t }), el("p", { class: "m-meta", text: m.meta })])]);
+  }
+  function paso(n, titulo, inst, cuerpo, extra) {
+    var falta = el("p", { class: "p-falta" });
+    var num = el("div", { class: "p-num", text: String(n), "data-n": String(n) });
+    var sec = el("section", { class: "paso" }, [num, el("div", { class: "p-cuerpo" },
+      [el("div", { class: "p-tit" }, [el("h2", { text: titulo })].concat(extra || [])), inst ? el("p", { class: "p-inst", text: inst }) : null].concat(cuerpo || []).concat([falta]))]);
+    sec._falta = falta; sec._num = num;
+    return sec;
+  }
+  function marcar(sec, ok, txtOk, txtFalta) {
+    sec.classList.toggle("ok", !!ok);
+    sec._num.textContent = ok ? "✓" : sec._num.getAttribute("data-n");
+    sec._falta.textContent = ok ? txtOk : (txtFalta || "");
+  }
+  function enGitHub() { return el("span", { class: "github", text: "En GitHub" }); }
+  function panel(m) {
+    var aside = el("aside", { class: "check", "aria-label": "Verificación" });
+    function pintar() {
+      var cs = criterios(m), ok = cs.filter(function (c) { return c.ok; }).length, pct = Math.round(100 * ok / cs.length);
+      aside.textContent = "";
+      aside.appendChild(el("div", { class: "anillo" }, [anillo(pct), el("div", null, [el("div", { class: "pct", text: pct + " %" }), el("div", { class: "p-inst", text: ok + " de " + cs.length + " criterios" })])]));
+      var ul = el("ul", { class: "criterios" }), grupo = null;
+      cs.forEach(function (c) {
+        if (c.grupo !== grupo) { grupo = c.grupo; ul.appendChild(el("li", { class: "ok" }, [el("span"), el("span", { class: "grupo", text: grupo })])); }
+        ul.appendChild(el("li", { class: c.ok ? "ok" : "" }, [el("span", { class: "ic", text: c.ok ? "✓" : "○" }), el("span", null, [c.t, c.detalle ? el("small", { text: c.detalle }) : null])]));
+      });
+      aside.appendChild(ul);
+      var r = repoPartes();
+      if (!r) aside.appendChild(el("p", { class: "p-inst", text: "Registren su repositorio en la misión 0 para ver su estado aquí." }));
+      else {
+        var est = S.remoto;
+        var txt = cargando ? "Leyendo su repositorio…" : est && est.error ? "Todavía no hay estado publicado en su repositorio." : est && est.generado ? "Estado de su repositorio: " + hace(est.generado) : "Pulsen «Actualizar» para leer su repositorio.";
+        aside.appendChild(el("div", { class: "fila" }, [el("button", { type: "button", class: "bt sec peq", onclick: function () { actualizarRemoto(pintarTodo); pintar(); } }, ["Actualizar"]), el("span", { class: "sello", text: txt })]));
+      }
+      if (ok === cs.length) {
+        var sig = MISIONES[m.id + 1];
+        aside.appendChild(el("div", { class: "premio", role: "status" }, [el("b", { text: "Misión " + m.id + " completada · +" + m.xp + " XP" }),
+          sig ? el("button", { type: "button", class: "bt peq", onclick: function () { ir(sig.id); } }, ["Ir a la misión " + sig.id]) : el("span", { class: "p-inst", text: "Terminaron el laboratorio." })]));
+      }
+    }
+    aside._pintar = pintar;
+    pintar();
+    return aside;
+  }
+  function problemas(m) {
+    return el("details", { class: "problemas" }, [el("summary", { text: "Problemas comunes de esta misión" }),
+      el("ul", null, m.problemas.map(function (p) { return el("li", null, [el("b", { text: p[0] + ". " }), p[1]]); }))]);
+  }
+  function envolver(m, pasos, arriba) {
+    var cont = el("div", { style: "display:flex;flex-direction:column;gap:16px" }, [cabecera(m)].concat(arriba || []));
+    var col = el("div", { class: "pasos" }, pasos.concat([problemas(m)]));
+    var p = panel(m);
+    cont.appendChild(el("div", { class: "m-grid" }, [col, p]));
+    cont._panel = p;
+    return cont;
+  }
+
+  /* ============ Misión 0 ============ */
+  function equipoMd() {
+    var ps = personasValidas(), R = rolesDisponibles();
+    var L2 = ["# Equipo", "", "Una fila por integrante. El usuario de GitHub va sin espacios; el checkpoint de la fase 0 lo lee de esta tabla. Los roles rotan por sesión: nadie repite rol.", "",
+      "| Nombre | Usuario de GitHub | Sesión 2 (fases 1 y 2) | Sesión 3 (fase 3) | Sesión 4 (fase 4) | Sesión 5 (fase 5) |", "|:---|:---|:---|:---|:---|:---|"];
+    ps.forEach(function (p, i) {
+      var roles = SESIONES.map(function (se) { var a = S.roles[se.s] || {}; var r = R.filter(function (rol) { return a[rol] === i; })[0]; return r || ""; });
+      L2.push("| " + p.nombre.trim() + " | " + p.gh.trim().replace(/^@/, "") + " | " + roles.join(" | ") + " |");
+    });
+    return L2.join("\n") + "\n";
+  }
+  function misionCero(m) {
+    var p1, p2, p3, p4, p5, p6, cont;
+    function refrescar() { pintarBanda(); pintarRuta(); if (cont) cont._panel._pintar(); estados(); pintarGitHub(); pintarTaller(); }
+
+    var seg = el("div", { class: "seg", role: "group", "aria-label": "Número de equipo" });
+    [1, 2, 3, 4].forEach(function (n) {
+      seg.appendChild(el("button", { type: "button", "aria-pressed": S.equipo === n ? "true" : "false", onclick: function () {
+        S.equipo = n; guardar(); Array.prototype.forEach.call(seg.children, function (b, i) { b.setAttribute("aria-pressed", i + 1 === n ? "true" : "false"); }); refrescar(); } }, [String(n)]));
+    });
+    var listaP = el("div", { class: "personas" });
+    function pintarPersonas() {
+      listaP.textContent = "";
+      S.personas.forEach(function (p, i) {
+        listaP.appendChild(el("div", { class: "persona" }, [el("span", { class: "n", text: String(i + 1) }),
+          el("input", { type: "text", id: "p-nombre-" + i, placeholder: "Nombre y apellido", value: p.nombre, "aria-label": "Nombre de la persona " + (i + 1), oninput: function (ev) { p.nombre = ev.target.value; guardar(); pintarRoles(); refrescar(); } }),
+          el("input", { type: "text", class: "gh mono", id: "p-gh-" + i, placeholder: "usuario-de-github", value: p.gh, "aria-label": "Usuario de GitHub de la persona " + (i + 1), oninput: function (ev) { p.gh = ev.target.value.trim().replace(/^@/, ""); guardar(); refrescar(); } }),
+          el("button", { type: "button", class: "quitar", "aria-label": "Quitar a la persona " + (i + 1), title: "Quitar", disabled: S.personas.length <= 4, onclick: function () { S.personas.splice(i, 1); S.roles = {}; guardar(); pintarPersonas(); pintarRoles(); refrescar(); } }, ["×"])]));
+      });
+      if (S.personas.length < 5) listaP.appendChild(el("button", { type: "button", class: "bt sec peq", onclick: function () { S.personas.push({ nombre: "", gh: "" }); guardar(); pintarPersonas(); pintarRoles(); refrescar(); } }, ["Agregar una quinta persona"]));
+    }
+    pintarPersonas();
+    p1 = paso(1, "Equipo", "El número que les dio el sorteo y quiénes son. El usuario es el de su cuenta de GitHub.", [el("div", { class: "fila" }, [el("span", { class: "p-inst", text: "Equipo" }), seg]), listaP]);
+
+    var apps = el("div", { class: "apps", role: "group", "aria-label": "App del equipo" });
+    Object.keys(APPS).forEach(function (k) {
+      var a = APPS[k];
+      apps.appendChild(el("button", { type: "button", class: "app", "aria-pressed": S.app === k ? "true" : "false", onclick: function (ev) {
+        S.app = k; guardar(); var yo = ev.currentTarget; Array.prototype.forEach.call(apps.children, function (b) { b.setAttribute("aria-pressed", b === yo ? "true" : "false"); }); refrescar(); } }, [
+        el("span", { class: "a-cab" }, [el("span", { class: "a-logo", text: a.logo }), el("span", null, [el("b", { text: a.n }), el("br"), el("span", { class: "a-tipo", text: a.tipo })])]),
+        el("span", { class: "a-stack" }, a.stack.map(function (s) { return el("span", { text: s }); }))]));
+    });
+    p2 = paso(2, "App", "La que les tocó en el sorteo.", [apps]);
+
+    var rolesCont = el("div", { class: "tabla-env" }), rolesMsg = el("p", { class: "p-inst" });
+    function pintarRoles() {
+      rolesCont.textContent = "";
+      var ps = personasValidas(), R = rolesDisponibles();
+      if (ps.length < 4) { rolesCont.appendChild(el("p", { class: "vacio", text: "Escriban primero los nombres del equipo." })); rolesMsg.textContent = ""; return; }
+      var porPersona = {};
+      var tabla = el("table", { class: "roles" }, [el("thead", null, [el("tr", null, [el("th", { text: "Sesión" })].concat(R.map(function (r) { return el("th", { text: r }); })))])]);
+      var tb = el("tbody");
+      SESIONES.forEach(function (se) {
+        var tr = el("tr", null, [el("td", { text: se.t })]);
+        var asig = S.roles[se.s] = S.roles[se.s] || {}, vistos = {};
+        R.forEach(function (rol) {
+          var sel = el("select", { "aria-label": se.t + ", " + rol, onchange: function (ev) { asig[rol] = ev.target.value === "" ? "" : Number(ev.target.value); guardar(); pintarRoles(); refrescar(); } },
+            [el("option", { value: "", text: "—" })].concat(ps.map(function (p, i) { return el("option", { value: String(i), text: p.nombre, selected: asig[rol] === i }); })));
+          var i = asig[rol], mal = false;
+          if (i !== "" && i != null && ps[i]) { if (vistos[i]) mal = true; vistos[i] = 1; porPersona[i] = porPersona[i] || {}; if (porPersona[i][rol]) mal = true; porPersona[i][rol] = 1; }
+          if (mal) sel.className = "mal";
+          tr.appendChild(el("td", null, [sel]));
+        });
+        tb.appendChild(tr);
+      });
+      tabla.appendChild(tb);
+      rolesCont.appendChild(tabla);
+      var pr = problemasRoles();
+      rolesMsg.textContent = pr.length ? pr.slice(0, 3).join(" · ") + (pr.length > 3 ? " · y " + (pr.length - 3) + " más" : "") : "";
+    }
+    pintarRoles();
+    var rotar = el("button", { type: "button", class: "bt sec peq", onclick: function () {
+      var ps = personasValidas(), R = rolesDisponibles(); if (ps.length < 4) return;
+      SESIONES.forEach(function (se, j) { var a = {}; R.forEach(function (rol, r) { a[rol] = (r + j) % ps.length; }); S.roles[se.s] = a; });
+      guardar(); pintarRoles(); refrescar(); } }, ["Rotar automáticamente"]);
+    p3 = paso(3, "Roles", "Quien tiene el rol lidera esa fase; todo el equipo trabaja en ella. Nadie repite rol.", [rotar, rolesCont, rolesMsg]);
+
+    var ghCont = el("div", { style: "display:flex;flex-direction:column;gap:10px" });
+    var extraCont = el("div", { style: "display:flex;flex-direction:column;gap:10px" });
+    var resultado = el("p", { class: "resultado", role: "status" });
+    var repoIn = el("input", { type: "text", id: "repo", class: "mono", placeholder: "https://github.com/usuario/sdlc-app-equipo-n", value: S.repo, "aria-label": "Enlace del repositorio",
+      oninput: function (ev) { S.repo = ev.target.value; S.remoto = null; guardar(); pintarResultado(); pintarExtra(); pintarBanda(); if (cont) cont._panel._pintar(); estados(); pintarTaller(); } });
+    function pintarResultado() {
+      var r = repoPartes(), e = S.remoto;
+      resultado.className = "resultado";
+      if (!S.repo.trim()) { resultado.textContent = "Peguen aquí el enlace cuando lo hayan creado."; return; }
+      if (!r) { resultado.className = "resultado mal"; resultado.textContent = "El enlace debe verse así: https://github.com/usuario/" + nombreRepo(); return; }
+      if (cargando) { resultado.textContent = "Leyendo su repositorio…"; return; }
+      if (e && e.fases) { resultado.className = "resultado ok"; resultado.textContent = "Conectado: el lab ya lee el estado de " + r.owner + "/" + r.repo + "."; return; }
+      if (e && e.error) { resultado.className = "resultado mal"; resultado.textContent = "Todavía no hay estado. Revisen que Pages esté en «GitHub Actions» y esperen 2 o 3 minutos a que corra «Checkpoints»."; return; }
+      resultado.textContent = "Registrado. Pulsen «Conectar» cuando Pages esté activo.";
+    }
+    var conectar = el("button", { type: "button", class: "bt sec", onclick: function () { actualizarRemoto(pintarTodo); pintarResultado(); } }, ["Conectar"]);
+    function pintarGitHub() {
+      ghCont.textContent = "";
+      var listo = S.app && S.equipo;
+      var usuarios = personasValidas().map(function (p) { return p.gh; }).filter(ghValido);
+      var dueno = usuarios[0];
+      ghCont.appendChild(el("div", { class: "mini-pasos" }, [
+        el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "a · Crear" }),
+          el("span", null, ["Una persona lo crea desde la plantilla. Dueño: ", el("b", { text: "su cuenta" }), ". Nombre: ", el("span", { class: "ruta-gh", text: nombreRepo() }), ". Visibilidad: ", el("b", { text: "Public" }), "."]),
+          listo ? el("a", { class: "bt peq", href: "https://github.com/" + ORG + "/sdlc-" + S.app + "/generate", target: "_blank", rel: "noopener" }, ["Crear desde la plantilla"]) : el("span", { class: "p-falta", text: "Elijan antes el equipo y la app." })]),
+        el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "b · Invitar" }),
+          el("span", null, [el("span", { class: "ruta-gh", text: "Settings → Collaborators → Add people" }), (dueno ? ". Inviten a todos menos a quien lo creó:" : ".")]),
+          usuarios.length > 1 ? el("div", { class: "chips" }, usuarios.slice(1).map(function (u) { return el("span", { class: "ruta-gh", text: "@" + u }); })) : null,
+          enlace("Abrir Collaborators", gh("settings/access"), true)]),
+        el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "c · Publicar" }),
+          el("span", null, [el("span", { class: "ruta-gh", text: "Settings → Pages" }), ". En «Source» elijan ", el("b", { text: "GitHub Actions" }), "."]),
+          enlace("Abrir Pages", gh("settings/pages"), true)])
+      ]));
+      ghCont.appendChild(el("div", { class: "campo" }, [el("label", { for: "repo", text: "Enlace del repositorio" }), el("div", { class: "fila" }, [repoIn, conectar])]));
+      ghCont.appendChild(resultado);
+      ghCont.appendChild(extraCont);
+      pintarExtra();
+      pintarResultado();
+    }
+    function pintarExtra() {
+      extraCont.textContent = "";
+      var r = repoPartes();
+      if (r) {
+        extraCont.appendChild(el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "d · EQUIPO.md" }),
+          el("span", { text: "Copien su EQUIPO.md, ábranlo en GitHub, reemplacen todo el contenido y pulsen «Commit changes». Eso corre «Fase 0 · CI»." }),
+          el("div", { class: "fila" }, [el("button", { type: "button", class: "bt peq", disabled: !(equipoOk() && problemasRoles().length === 0), onclick: function (ev) { copiar(equipoMd(), ev.currentTarget); } }, ["Copiar EQUIPO.md"]),
+            enlace("Editar EQUIPO.md", gh("edit/main/EQUIPO.md"), true)]),
+          (equipoOk() && problemasRoles().length === 0) ? null : el("span", { class: "p-falta", text: "Completen antes los pasos 1 a 3." })]));
+        extraCont.appendChild(el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "e · Avísenle al profesor" }),
+          el("span", { text: "Pásenle este texto para que su equipo aparezca en el tablero de la clase." }),
+          el("button", { type: "button", class: "bt sec peq", onclick: function (ev) {
+            copiar(JSON.stringify({ equipo: "Equipo " + (S.equipo || "?"), app: S.app ? APPS[S.app].n : "", repo: r.owner + "/" + r.repo, pages: "https://" + r.owner.toLowerCase() + ".github.io/" + r.repo + "/" }), ev.currentTarget);
+          } }, ["Copiar para el profesor"])]));
+      }
+    }
+    pintarGitHub();
+    p4 = paso(4, "Repositorio", "Su taller vive en GitHub. Lo crean una vez y el lab se conecta con él.", [ghCont], [enGitHub()]);
+
+    var tallerCont = el("div", { style: "display:flex;flex-direction:column;gap:10px" });
+    var tallerChip = el("button", { type: "button", class: "chip", style: "align-self:flex-start", "aria-pressed": S.taller ? "true" : "false", onclick: function () {
+      S.taller = !S.taller; guardar(); refrescar(); } }, [""]);
+    function pintarTaller() {
+      tallerCont.textContent = "";
+      var t = S.app ? APPS[S.app] : null;
+      tallerCont.appendChild(el("div", { class: "mini-pasos" }, [
+        el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "a · Abrir" }), el("span", null, ["En su repositorio: ", el("span", { class: "ruta-gh", text: "Code → Codespaces → Create codespace on main" }), ". La primera vez tarda unos minutos."]), enlace("Abrir su repositorio", gh(""), true)]),
+        el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "b · Levantar" }), el("span", { text: "En la terminal del Codespace:" }), cmd(t ? t.cmd : "bash lab/app.sh levantar")]),
+        el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "c · Ver" }), el("span", null, ["Pestaña ", el("b", { text: "Ports" }), ", puerto ", el("b", { text: t ? String(t.puerto) : "de su app" }), ", ícono del globo."]), el("span", { class: "p-inst", text: t ? t.tip : "Elijan la app en el paso 2." })])
+      ]));
+      tallerCont.appendChild(el("div", { class: "aviso" }, [el("b", { text: "Cuiden su cuota de Codespaces: " }), "un solo Codespace por persona · deténganlo al terminar · bórrenlo al cerrar el curso en github.com/codespaces."]));
+      tallerChip.setAttribute("aria-pressed", S.taller ? "true" : "false");
+      tallerChip.textContent = S.taller ? "La app abrió ✓" : "Ya la vimos en el navegador";
+      tallerCont.appendChild(tallerChip);
+    }
+    pintarTaller();
+    p5 = paso(5, "Taller", "Ahí corre la app que van a analizar. Recórranla 10 minutos como usuarios normales.", [tallerCont], [enGitHub()]);
+
+    var predCont = el("div", { style: "display:flex;flex-direction:column;gap:8px" });
+    S.pred.forEach(function (p, i) {
+      var chips = el("div", { class: "chips", role: "group", "aria-label": "Técnica, predicción " + (i + 1) });
+      TECNICAS.forEach(function (t) {
+        chips.appendChild(el("button", { type: "button", class: "chip", "aria-pressed": p.t === t ? "true" : "false", onclick: function () {
+          p.t = t; guardar(); Array.prototype.forEach.call(chips.children, function (b) { b.setAttribute("aria-pressed", b.textContent === t ? "true" : "false"); }); refrescar(); } }, [t]));
+      });
+      predCont.appendChild(el("div", { class: "pred" }, [el("span", { class: "n", text: String(i + 1) }),
+        el("select", { "aria-label": "Debilidad, predicción " + (i + 1), onchange: function (ev) { p.w = ev.target.value; guardar(); refrescar(); } },
+          [el("option", { value: "", text: "Debilidad…" })].concat(NUCLEO.map(function (w) { return el("option", { value: w.c, text: w.t, selected: p.w === w.c }); }))), chips]));
+    });
+    p6 = paso(6, "Predicción", "¿Qué 3 debilidades creen que tiene su app, y qué técnica la va a encontrar? La revisan en la misión 10.", [predCont]);
+
+    function estados() {
+      var ps = personasValidas(), malos = ps.filter(function (p) { return !ghValido(p.gh); }).length;
+      marcar(p1, equipoOk(), "Listo.", !S.equipo ? "Falta el número de equipo." : ps.length < 4 ? "Faltan " + (4 - ps.length) + " persona(s)." : malos ? malos + " usuario(s) de GitHub con formato inválido." : "");
+      marcar(p2, !!S.app, "Listo.", "Falta elegir la app.");
+      marcar(p3, problemasRoles().length === 0, "Listo: nadie repite rol.", ps.length < 4 ? "Primero completen el equipo en el paso 1." : "Revisen las celdas en rojo o usen «Rotar automáticamente».");
+      var c0 = checkRemoto("f0.equipo"), c1 = checkRemoto("f0.ci"), c2 = checkRemoto("f0.pages");
+      var repoOk = !!repoPartes() && !!(c0 && c0.ok && c1 && c1.ok && c2 && c2.ok);
+      marcar(p4, repoOk, "Listo: su repositorio está conectado y en verde.", !repoPartes() ? "Falta registrar el enlace del repositorio." : "Sigan los pasos a a d y pulsen «Conectar».");
+      marcar(p5, !!S.taller, "Listo: ya conocen su app.", "Marquen cuando la app haya abierto en el navegador.");
+      marcar(p6, predOk(), "Listo. Escríbanla también en el issue «Fase 0» de su repositorio.", "Faltan predicciones o hay debilidades repetidas.");
+    }
+    cont = envolver(m, [p1, p2, p3, p4, p5, p6]);
+    estados();
+    return cont;
+  }
+
+  /* ============ Misión 1 ============ */
+  function misionUno(m) {
+    var app = S.app ? APPS[S.app] : null, cont, p1, p2, p3;
+    var tiras = el("div", { class: "stride", role: "list", "aria-label": "Cobertura STRIDE" });
+    function pintarStride() {
+      var cub = strideCubiertas(); tiras.textContent = "";
+      STRIDE.forEach(function (s) { tiras.appendChild(el("div", { class: "st" + (cub[s.k] ? " on" : ""), "data-k": s.k, role: "listitem" }, [el("span", { class: "L", text: s.k }), el("span", { class: "nom", text: s.n }), el("span", { class: "des", text: s.d })])); });
+    }
+    pintarStride();
+    function refrescar() { pintarStride(); pintarBanda(); pintarRuta(); if (cont) cont._panel._pintar(); estados(); }
+
+    var hechoCartas = el("button", { type: "button", class: "chip", "aria-pressed": S.cartas ? "true" : "false", onclick: function (ev) { S.cartas = !S.cartas; ev.currentTarget.setAttribute("aria-pressed", S.cartas ? "true" : "false"); guardar(); refrescar(); } }, ["Ya jugamos las cartas"]);
+    p1 = paso(1, "Cartas", null, [el("div", { class: "mini-pasos" }, [
+      el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "a" }), el("span", null, ["Abran ", el("a", { href: "https://copi.owasp.org", target: "_blank", rel: "noopener", text: "copi.owasp.org" }), " y creen un juego con la edición ", el("b", { text: "Website App" }), "."])]),
+      el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "b" }), el("span", { text: "Repartan las cartas entre todo el equipo." })]),
+      el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "c" }), el("span", null, ["Por cada carta: ", el("b", { text: "¿le puede pasar a nuestra app? ¿Dónde?" }), " Cada «sí» con un lugar concreto es un caso."])])]), hechoCartas]);
+
+    var B = S.borrador, vistaPrevia = el("div", { class: "caso" });
+    function campoTexto(id, etiqueta, ph, ancho, obj, alCambiar) {
+      var lab = el("label", { for: "f-" + id }, [etiqueta + " "]);
+      var inp = el("input", { type: "text", id: "f-" + id, placeholder: ph, value: obj[id] || "", oninput: function (ev) { obj[id] = ev.target.value; guardar(); alCambiar(); } });
+      return { nodo: el("div", { class: "campo" + (ancho ? " ancho" : "") }, [lab, inp]), lab: lab, inp: inp };
+    }
+    function marcaLab(lab, ok) { var e = lab.querySelector(".ok"); if (ok && !e) lab.appendChild(el("span", { class: "ok", text: "✓" })); if (!ok && e) e.remove(); }
+    var fTitulo = campoTexto("titulo", "Título corto", "Fuerza bruta en el inicio de sesión", true, B, estadoForm);
+    var fActor = campoTexto("actor", "Actor malicioso", "Quién ataca", false, B, estadoForm);
+    fActor.nodo.appendChild(el("div", { class: "chips" }, ACTORES.map(function (a) { return el("button", { type: "button", class: "chip", onclick: function () { B.actor = a; fActor.inp.value = a; guardar(); estadoForm(); } }, [a]); })));
+    var fObjetivo = campoTexto("objetivo", "Objetivo del atacante", "Qué quiere lograr", false, B, estadoForm);
+    var catChips = el("div", { class: "chips", role: "group", "aria-label": "Categoría" });
+    CATS.forEach(function (c) {
+      catChips.appendChild(el("button", { type: "button", class: "chip cat-chip", "data-k": c.k, "aria-pressed": B.cat === c.k ? "true" : "false", title: c.d || c.n, onclick: function () {
+        B.cat = c.k; guardar(); Array.prototype.forEach.call(catChips.children, function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-k") === c.k ? "true" : "false"); }); estadoForm(); } },
+        ["STRIDE".indexOf(c.k) >= 0 ? c.k + " · " + c.n : c.n]));
+    });
+    var labCat = el("span", { class: "lab" }, ["Categoría "]);
+    var labComp = el("label", { for: "f-comp" }, ["Componente afectado "]);
+    var selComp = el("select", { id: "f-comp", onchange: function (ev) { B.comp = ev.target.value; guardar(); estadoForm(); } },
+      [el("option", { value: "", text: app ? "Elijan un componente de " + app.n + "…" : "Primero elijan la app en la misión 0" })].concat((app ? app.comps : []).map(function (c) { return el("option", { value: c, text: c, selected: B.comp === c }); })));
+    var fCarta = campoTexto("carta", "Carta de Cornucopia", "Por ejemplo, VE5", false, B, estadoForm);
+    var labCwe = el("label", { for: "f-cwe" }, ["CWE "]);
+    var selCwe = el("select", { id: "f-cwe", onchange: function (ev) { B.cwe = ev.target.value; guardar(); estadoForm(); } },
+      [el("option", { value: "", text: "Opcional…" })].concat(NUCLEO.map(function (w) { return el("option", { value: w.c, text: w.c + " · " + w.t, selected: B.cwe === w.c }); })));
+    function gl(obj, id, palabra, ph, alCambiar) {
+      var inp = el("input", { type: "text", id: "f-" + id + (obj === B ? "" : "-r"), placeholder: ph, value: obj[id] || "", "aria-label": palabra, oninput: function (ev) { obj[id] = ev.target.value; guardar(); alCambiar(); } });
+      return el("div", { class: "g " + id }, [el("span", { text: palabra }), inp]);
+    }
+    var labEsc = el("span", { class: "lab" }, ["Escenario "]);
+    var ej = el("div", { class: "ejemplo", hidden: true }, [el("b", { text: "Ejemplo de otra app: una billetera ficticia" }),
+      el("span", null, [el("b", { text: "Actor: " }), "cliente registrado, sin privilegios · ", el("b", { text: "Categoría: " }), "T · Manipulación · ", el("b", { text: "Componente: " }), el("span", { class: "ruta-gh", text: "POST /api/transferencias" })]),
+      el("span", null, [el("b", { text: "Dado " }), "un cliente autenticado con saldo de ₡10 000 y la cuenta destino de otra persona"]),
+      el("span", null, [el("b", { text: "Cuando " }), "envía POST /api/transferencias con monto -5000 hacia esa cuenta"]),
+      el("span", null, [el("b", { text: "Entonces " }), "su saldo sube a ₡15 000 y el de la otra persona baja en ₡5 000"])]);
+    var verEj = el("button", { type: "button", class: "bt sec peq", onclick: function (ev) { ej.hidden = !ej.hidden; ev.currentTarget.textContent = ej.hidden ? "Ver un ejemplo" : "Ocultar el ejemplo"; } }, ["Ver un ejemplo"]);
+    var agregar = el("button", { type: "button", class: "bt", onclick: function () {
+      if (!casoCompleto(B)) return;
+      S.casos.push(Object.assign({ enviado: false }, B)); S.borrador = borradorCaso(); guardar(); pintarTodo();
+      var l = document.getElementById("lista-casos"); if (l) l.scrollIntoView({ behavior: "smooth", block: "start" }); } }, ["Agregar el caso"]);
+    var faltaForm = el("span", { class: "p-inst" });
+    function estadoForm() {
+      marcaLab(fTitulo.lab, B.titulo.trim()); marcaLab(fActor.lab, B.actor.trim()); marcaLab(fObjetivo.lab, B.objetivo.trim());
+      marcaLab(labCat, B.cat); marcaLab(labComp, B.comp); marcaLab(fCarta.lab, B.carta.trim()); marcaLab(labCwe, B.cwe);
+      marcaLab(labEsc, B.dado.trim().length >= 8 && B.cuando.trim().length >= 8 && B.entonces.trim().length >= 8);
+      var falta = [];
+      if (!B.titulo.trim()) falta.push("título"); if (!B.actor.trim()) falta.push("actor"); if (!B.objetivo.trim()) falta.push("objetivo");
+      if (!B.cat) falta.push("categoría"); if (!B.comp) falta.push("componente"); if (!B.carta.trim()) falta.push("carta");
+      if (B.dado.trim().length < 8 || B.cuando.trim().length < 8 || B.entonces.trim().length < 8) falta.push("escenario completo");
+      agregar.disabled = falta.length > 0;
+      faltaForm.textContent = falta.length ? "Falta: " + falta.join(", ") + "." : "Listo para agregar.";
+      pintarCaso(vistaPrevia, B, null);
+    }
+    p2 = paso(2, "Nuevo caso", "Un caso por carta que aplique. El componente sale del mapa de su app.", [
+      el("div", { class: "form-caso" }, [fTitulo.nodo, fActor.nodo, fObjetivo.nodo, el("div", { class: "campo ancho" }, [labCat, catChips]), el("div", { class: "campo ancho" }, [labComp, selComp]),
+        fCarta.nodo, el("div", { class: "campo" }, [labCwe, selCwe]),
+        el("div", { class: "campo ancho" }, [labEsc, el("div", { class: "gherkin" }, [gl(B, "dado", "Dado", "el contexto: quién es y qué tiene", estadoForm), gl(B, "cuando", "Cuando", "la acción del atacante, con el endpoint", estadoForm), gl(B, "entonces", "Entonces", "el daño que alguien notaría", estadoForm)])])]),
+      el("div", { class: "fila" }, [agregar, verEj, faltaForm]), ej, el("span", { class: "ceja", text: "Así se va a ver" }), vistaPrevia]);
+
+    var lista = el("div", { class: "casos", id: "lista-casos" });
+    function urlCaso(c) {
+      var cat = CATS.filter(function (x) { return x.k === c.cat; })[0];
+      return urlIssue("1-caso-de-abuso.yml", { title: "[Abuso] " + c.titulo, actor: c.actor, objetivo: c.objetivo, categoria: cat ? cat.form : "", carta: c.carta,
+        escenario: "Dado " + c.dado.trim() + "\nCuando " + c.cuando.trim() + "\nEntonces " + c.entonces.trim(), componente: (c.comp || "").split(" · ")[0], cwe: c.cwe || "" });
+    }
+    function pintarCaso(nodo, c, i) {
+      var cat = CATS.filter(function (x) { return x.k === c.cat; })[0];
+      nodo.textContent = ""; nodo.setAttribute("data-k", c.cat || "");
+      nodo.appendChild(el("div", { class: "c-cab" }, [el("b", { text: c.titulo.trim() || "Título del caso" }), cat ? el("span", { class: "c-cat", text: cat.form }) : null, c.cwe ? el("span", { class: "c-cat", text: c.cwe }) : null, c.carta ? el("span", { class: "c-cat", text: "Carta " + c.carta }) : null]));
+      nodo.appendChild(el("span", { class: "c-comp", text: (c.comp || "Componente").split(" · ")[0] + (c.actor ? " · " + c.actor : "") }));
+      nodo.appendChild(el("div", { class: "c-g" }, [el("span", null, [el("b", { text: "Dado " }), c.dado || "…"]), el("span", null, [el("b", { text: "Cuando " }), c.cuando || "…"]), el("span", null, [el("b", { text: "Entonces " }), c.entonces || "…"])]));
+      if (i == null) return;
+      var u = urlCaso(c);
+      nodo.appendChild(el("div", { class: "c-acc" }, [
+        u ? el("a", { class: "bt peq", href: u, target: "_blank", rel: "noopener", onclick: function () { c.enviado = true; guardar(); setTimeout(pintarLista, 300); } }, ["Crear el issue en GitHub"]) : el("span", { class: "p-falta", text: "Registren el repositorio en la misión 0." }),
+        c.enviado ? el("span", { class: "enviado", text: "Abierto en GitHub ✓" }) : null,
+        el("button", { type: "button", class: "bt sec peq", onclick: function () { S.casos.splice(i, 1); guardar(); pintarLista(); refrescar(); } }, ["Quitar"])]));
+    }
+    function pintarLista() {
+      lista.textContent = "";
+      if (!S.casos.length) { lista.appendChild(el("p", { class: "vacio", text: "Todavía no hay casos. Los que agreguen aparecen aquí, listos para llevar a GitHub." })); return; }
+      S.casos.forEach(function (c, i) { var n = el("div", { class: "caso" }); pintarCaso(n, c, i); lista.appendChild(n); });
+    }
+    pintarLista();
+    p3 = paso(3, "Llévenlos a GitHub", "«Crear el issue» abre el formulario de su repositorio ya lleno. Revisen la categoría y pulsen «Submit new issue». Después, «Actualizar» en el panel.", [lista], [enGitHub()]);
+    function estados() {
+      var n = S.casos.length, cub = Object.keys(strideCubiertas()).length;
+      marcar(p1, !!S.cartas, "Listo.", "Marquen cuando hayan jugado las cartas.");
+      marcar(p2, n >= 6 && cub >= 5, "Listo: 6 casos que cubren 5 categorías.", "Llevan " + n + " de 6 casos y " + cub + " de 5 categorías STRIDE.");
+      var c = checkRemoto("f1.casos");
+      marcar(p3, !!(c && c.ok), "Listo: GitHub ya cuenta sus casos.", c ? "GitHub cuenta: " + c.detalle + "." : "Creen los issues y pulsen «Actualizar».");
+    }
+    cont = envolver(m, [p1, p2, p3], [el("div", { style: "display:flex;flex-direction:column;gap:8px" }, [el("span", { class: "ceja", text: "Cobertura STRIDE · se enciende con cada caso" }), tiras])]);
+    estadoForm(); estados();
+    return cont;
+  }
+
+  /* ============ Misión 2 ============ */
+  function misionDos(m) {
+    var cont, p1, p2, p3;
+    var Q = S.borradorReq;
+    function refrescar() { pintarBanda(); pintarRuta(); if (cont) cont._panel._pintar(); estados(); }
+    var cwes = {}; S.casos.forEach(function (c) { if (c.cwe) cwes[c.cwe] = 1; });
+    var sugs = NUCLEO.filter(function (w) { return cwes[w.c]; }); if (!sugs.length) sugs = NUCLEO;
+    var inId = el("input", { type: "text", id: "q-id", class: "mono", placeholder: "8.2.2", value: Q.id, oninput: function (ev) { Q.id = ev.target.value.trim().replace(/^V/i, ""); guardar(); estadoForm(); } });
+    var selCap = el("select", { id: "q-cap", onchange: function (ev) { Q.cap = ev.target.value; guardar(); estadoForm(); } }, [el("option", { value: "", text: "Capítulo…" })].concat(CAPITULOS.map(function (c) { return el("option", { value: c, text: c, selected: Q.cap === c }); })));
+    var sug = el("div", { class: "sug" }, sugs.map(function (w) {
+      return el("button", { type: "button", class: "chip", title: w.cap, onclick: function () { if (w.asvs) { Q.id = w.asvs; inId.value = w.asvs; } Q.cap = w.cap; selCap.value = w.cap; guardar(); estadoForm(); } },
+        [w.c + " → " + (w.asvs ? w.asvs : "V16") + (w.nivel2 ? " (nivel 2)" : "")]);
+    }));
+    p1 = paso(1, "Busquen el requerimiento", "Por cada caso de abuso, el requerimiento de ASVS 5.0 que lo impediría. Las sugerencias salen de los CWE de sus casos: léanlo en ASVS antes de usarlo.", [
+      el("a", { class: "bt sec peq", href: "https://owasp.org/www-project-application-security-verification-standard/", target: "_blank", rel: "noopener" }, ["Abrir ASVS 5.0"]), el("span", { class: "ceja", text: "Sugerencias" }), sug]);
+    var inEnun = el("input", { type: "text", id: "q-enun", placeholder: "Qué debe cumplir su app, en una oración verificable", value: Q.enunciado, oninput: function (ev) { Q.enunciado = ev.target.value; guardar(); estadoForm(); } });
+    var inCasos = el("input", { type: "text", id: "q-casos", class: "mono", placeholder: "#3, #5", value: Q.casos, oninput: function (ev) { Q.casos = ev.target.value; guardar(); estadoForm(); } });
+    function g2(id, palabra, ph) {
+      var inp = el("input", { type: "text", id: "q-" + id, placeholder: ph, value: Q[id] || "", "aria-label": palabra, oninput: function (ev) { Q[id] = ev.target.value; guardar(); estadoForm(); } });
+      return el("div", { class: "g " + id }, [el("span", { text: palabra }), inp]);
+    }
+    var faltaQ = el("span", { class: "p-inst" });
+    var agregarQ = el("button", { type: "button", class: "bt", onclick: function () { if (!reqCompleto(Q)) return; S.reqs.push(Object.assign({ enviado: false }, Q)); S.borradorReq = borradorReq(); guardar(); pintarTodo(); } }, ["Agregar el requerimiento"]);
+    function estadoForm() {
+      var f = [];
+      if (!/^\d{1,2}\.\d{1,2}\.\d{1,2}$/.test(Q.id.trim())) f.push("identificador como 8.2.2"); if (!Q.cap) f.push("capítulo");
+      if (Q.enunciado.trim().length < 12) f.push("enunciado"); if (!/#\d+/.test(Q.casos)) f.push("casos que mitiga (#n)");
+      if (Q.dado.trim().length < 8 || Q.cuando.trim().length < 8 || Q.entonces.trim().length < 8) f.push("criterios completos");
+      agregarQ.disabled = f.length > 0; faltaQ.textContent = f.length ? "Falta: " + f.join(", ") + "." : "Listo para agregar.";
+    }
+    p2 = paso(2, "Escríbanlo", null, [el("div", { class: "form-caso" }, [
+      el("div", { class: "campo" }, [el("label", { for: "q-id", text: "Identificador ASVS" }), inId]), el("div", { class: "campo" }, [el("label", { for: "q-cap", text: "Capítulo" }), selCap]),
+      el("div", { class: "campo ancho" }, [el("label", { for: "q-enun", text: "Requerimiento" }), inEnun]),
+      el("div", { class: "campo ancho" }, [el("label", { for: "q-casos", text: "Casos de abuso que mitiga (números de issue)" }), inCasos]),
+      el("div", { class: "campo ancho" }, [el("span", { class: "lab", text: "Criterios de aceptación" }), el("div", { class: "gherkin" }, [g2("dado", "Dado", "el contexto"), g2("cuando", "Cuando", "el intento de abuso"), g2("entonces", "Entonces", "lo que la app debe hacer")])])]),
+      el("div", { class: "fila" }, [agregarQ, faltaQ])]);
+    var lista = el("div", { class: "casos" });
+    function pintarLista() {
+      lista.textContent = "";
+      if (!S.reqs.length) { lista.appendChild(el("p", { class: "vacio", text: "Los requerimientos que agreguen aparecen aquí, listos para llevar a GitHub." })); return; }
+      S.reqs.forEach(function (q, i) {
+        var u = urlIssue("2-requerimiento.yml", { title: "[Req] " + q.id + " " + q.enunciado.slice(0, 60), identificador: q.id, capitulo: q.cap, enunciado: q.enunciado, casos: q.casos,
+          criterios: "Dado " + q.dado.trim() + "\nCuando " + q.cuando.trim() + "\nEntonces " + q.entonces.trim() });
+        lista.appendChild(el("div", { class: "caso" }, [el("div", { class: "c-cab" }, [el("b", { text: q.id + " · " + q.enunciado }), el("span", { class: "c-cat", text: q.cap.split(" · ")[0] }), el("span", { class: "c-cat", text: "Mitiga " + q.casos })]),
+          el("div", { class: "c-acc" }, [u ? el("a", { class: "bt peq", href: u, target: "_blank", rel: "noopener", onclick: function () { q.enviado = true; guardar(); setTimeout(pintarLista, 300); } }, ["Crear el issue en GitHub"]) : el("span", { class: "p-falta", text: "Registren el repositorio en la misión 0." }),
+            q.enviado ? el("span", { class: "enviado", text: "Abierto en GitHub ✓" }) : null, el("button", { type: "button", class: "bt sec peq", onclick: function () { S.reqs.splice(i, 1); guardar(); pintarLista(); refrescar(); } }, ["Quitar"])])]));
+      });
+    }
+    pintarLista();
+    p3 = paso(3, "Llévenlos a GitHub y enlacen", "Creen cada issue. Luego editen cada caso de abuso y pongan en «Requerimientos que lo mitigan» el número del requerimiento.", [lista, enlace("Ver sus issues", gh("issues"), true)], [enGitHub()]);
+    function estados() {
+      var c1 = checkRemoto("f1.requerimientos"), c2 = checkRemoto("f1.trazabilidad");
+      marcar(p1, S.reqs.length > 0, "Listo.", "");
+      marcar(p2, S.reqs.length >= 6, "Listo: " + S.reqs.length + " requerimientos.", "Llevan " + S.reqs.length + " de 6 requerimientos.");
+      marcar(p3, !!(c1 && c1.ok && c2 && c2.ok), "Listo: GitHub ya ve la trazabilidad.", c1 ? "GitHub: " + (c1.detalle || "") + (c2 && !c2.ok ? " · " + c2.detalle : "") : "Creen los issues y pulsen «Actualizar».");
+    }
+    cont = envolver(m, [p1, p2, p3]);
+    estadoForm(); estados();
+    return cont;
+  }
+
+  /* ============ Misión 3 ============ */
+  function misionTres(m) {
+    var cont, p1, p2, p3;
+    function refrescar() { pintarBanda(); pintarRuta(); if (cont) cont._panel._pintar(); estados(); }
+    if (!S.matriz.length) for (var k = 0; k < 6; k++) S.matriz.push({ amenaza: "", stride: "", caso: "", p: 0, i: 0, trat: "" });
+    p1 = paso(1, "DFD con fronteras", null, [el("div", { class: "mini-pasos" }, [
+      el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "a · Abrir" }), el("span", null, ["En su Codespace abran ", el("span", { class: "ruta-gh", text: "seguridad/fase-2/dfd.drawio.svg" }), ": se abre con el editor de Draw.io."])]),
+      el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "b · Dibujar" }), el("span", { text: "Actores, procesos, datos y flujos de su app. Usen el mapa de la app." })]),
+      el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "c · Fronteras" }), el("span", null, ["Rotulen cada frontera con la palabra ", el("b", { text: "«Frontera de confianza»" }), ". Guarden y hagan commit a main."])])])]);
+    var calor = el("div", { class: "calor", "aria-label": "Mapa de calor de riesgos" });
+    var tbody = el("tbody");
+    function nivel(r) { return r >= 6 ? 3 : r >= 3 ? 2 : 1; }
+    function pintarCalor() {
+      calor.textContent = "";
+      [3, 2, 1].forEach(function (pp) {
+        calor.appendChild(el("span", { class: "eje", text: "P" + pp }));
+        [1, 2, 3].forEach(function (ii) {
+          var ids = S.matriz.map(function (f, j) { return f.p === pp && f.i === ii ? "R-" + String(j + 1).padStart(2, "0") : null; }).filter(Boolean);
+          calor.appendChild(el("div", { class: "c c" + nivel(pp * ii), title: "P " + pp + " × I " + ii + " = " + pp * ii }, ids.map(function (x) { return el("span", { text: x }); })));
+        });
+      });
+      calor.appendChild(el("span")); [1, 2, 3].forEach(function (ii) { calor.appendChild(el("span", { class: "eje", text: "I" + ii })); });
+    }
+    function pintarTabla() {
+      tbody.textContent = "";
+      S.matriz.forEach(function (f, j) {
+        function num(campo) {
+          return el("select", { "aria-label": campo + " de R-" + (j + 1), onchange: function (ev) { f[campo] = Number(ev.target.value); guardar(); pintarTabla(); pintarCalor(); estados(); } },
+            [el("option", { value: "0", text: "—" })].concat([1, 2, 3].map(function (n) { return el("option", { value: String(n), text: String(n), selected: f[campo] === n }); })));
+        }
+        var r = f.p && f.i ? f.p * f.i : "";
+        tbody.appendChild(el("tr", null, [
+          el("td", { class: "mono", text: "R-" + String(j + 1).padStart(2, "0") }),
+          el("td", null, [el("input", { type: "text", value: f.amenaza, placeholder: "Qué puede salir mal", "aria-label": "Amenaza R-" + (j + 1), oninput: function (ev) { f.amenaza = ev.target.value; guardar(); estados(); } })]),
+          el("td", null, [el("select", { "aria-label": "STRIDE R-" + (j + 1), onchange: function (ev) { f.stride = ev.target.value; guardar(); estados(); } }, [el("option", { value: "", text: "—" })].concat(STRIDE.map(function (s) { return el("option", { value: s.k, text: s.k, selected: f.stride === s.k }); })))]),
+          el("td", null, [el("input", { type: "text", class: "mono", value: f.caso, placeholder: "#3", "aria-label": "Caso de abuso R-" + (j + 1), oninput: function (ev) { f.caso = ev.target.value; guardar(); estados(); } })]),
+          el("td", null, [num("p")]), el("td", null, [num("i")]),
+          el("td", { class: "r c" + (r ? nivel(r) : ""), text: String(r) }),
+          el("td", null, [el("select", { "aria-label": "Tratamiento R-" + (j + 1), onchange: function (ev) { f.trat = ev.target.value; guardar(); estados(); } }, [el("option", { value: "", text: "—" })].concat(TRATAMIENTOS.map(function (t) { return el("option", { value: t, text: t, selected: f.trat === t }); })))])
+        ]));
+      });
+    }
+    function filasOk() { return S.matriz.filter(function (f) { return f.amenaza.trim() && f.stride && /#\d+/.test(f.caso) && f.p && f.i; }); }
+    function matrizMd() {
+      var L3 = ["| ID | Amenaza | STRIDE | Caso de abuso | Probabilidad | Impacto | Riesgo | Tratamiento |", "|:---|:---|:---|:---|:---|:---|:---|:---|"];
+      filasOk().forEach(function (f, j) { L3.push("| R-" + String(j + 1).padStart(2, "0") + " | " + f.amenaza.trim().replace(/\|/g, "/") + " | " + f.stride + " | " + f.caso.trim() + " | " + f.p + " | " + f.i + " | " + f.p * f.i + " | " + (f.trat || "") + " |"); });
+      return L3.join("\n") + "\n";
+    }
+    pintarTabla(); pintarCalor();
+    var masFila = el("button", { type: "button", class: "bt sec peq", onclick: function () { S.matriz.push({ amenaza: "", stride: "", caso: "", p: 0, i: 0, trat: "" }); guardar(); pintarTabla(); pintarCalor(); estados(); } }, ["Agregar un riesgo"]);
+    p2 = paso(2, "Matriz de riesgos", "Un riesgo por fila, cada uno con su caso de abuso. Probabilidad e impacto del 1 al 3; el riesgo se calcula solo.", [
+      el("div", { class: "fila", style: "align-items:flex-start;gap:18px" }, [calor, el("p", { class: "p-inst", style: "flex:1 1 220px", text: "Cada riesgo aparece en su celda. Arriba a la derecha, lo más urgente." })]),
+      el("div", { class: "tabla-env" }, [el("table", { class: "matriz" }, [el("thead", null, [el("tr", null, ["ID", "Amenaza", "STRIDE", "Caso de abuso", "P", "I", "Riesgo", "Tratamiento"].map(function (h) { return el("th", { text: h }); }))]), tbody])]), masFila]);
+    var copiarM = el("button", { type: "button", class: "bt peq", onclick: function (ev) { copiar(matrizMd(), ev.currentTarget); } }, ["Copiar la matriz"]);
+    p3 = paso(3, "Llévenla a GitHub", "Abran matriz-riesgos.md, reemplacen la tabla completa por la que copian aquí y hagan commit a main. Incluyan todos sus casos de abuso.", [
+      el("div", { class: "fila" }, [copiarM, enlace("Editar matriz-riesgos.md", gh("edit/main/seguridad/fase-2/matriz-riesgos.md"), true)])], [enGitHub()]);
+    function estados() {
+      var n = filasOk().length, c = checkRemoto("f2.matriz"), d = checkRemoto("f2.dfd"), cob = checkRemoto("f2.cobertura");
+      copiarM.disabled = n < 6;
+      marcar(p1, !!(d && d.ok), "Listo: el DFD tiene su frontera.", d ? "GitHub: " + (d.detalle || "pendiente") + "." : "Editen el DFD y pulsen «Actualizar».");
+      marcar(p2, n >= 6, "Listo: " + n + " riesgos completos.", "Llevan " + n + " de 6 riesgos completos.");
+      marcar(p3, !!(c && c.ok && cob && cob.ok), "Listo: GitHub valida la matriz.", c ? "GitHub: " + c.detalle + (cob && !cob.ok && cob.detalle ? " · " + cob.detalle : "") + "." : "Copien la matriz, hagan commit y pulsen «Actualizar».");
+    }
+    cont = envolver(m, [p1, p2, p3]);
+    estados();
+    return cont;
+  }
+
+  /* ============ Misiones 4 a 10 (guiadas en el repositorio) ============ */
+  var relojFin = null, relojTimer = null;
+  function misionGuiada(m) {
+    var arriba = [];
+    if (m.reloj) {
+      var cifra = el("div", { class: "reloj", text: "20:00" });
+      var btn = el("button", { type: "button", class: "bt sec peq" }, ["Iniciar la ventana de 20 minutos"]);
+      function tic() {
+        if (!relojFin) return;
+        var s = Math.max(0, Math.round((relojFin - Date.now()) / 1000));
+        cifra.textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+        cifra.classList.toggle("fin", s === 0);
+        if (s === 0) { clearInterval(relojTimer); relojTimer = null; btn.textContent = "Ventana cerrada: el gate decide"; }
+      }
+      btn.addEventListener("click", function () { relojFin = Date.now() + 20 * 60 * 1000; if (relojTimer) clearInterval(relojTimer); relojTimer = setInterval(tic, 1000); tic(); btn.textContent = "Ventana abierta"; });
+      if (relojFin) { if (relojTimer) clearInterval(relojTimer); relojTimer = setInterval(tic, 1000); tic(); }
+      arriba.push(el("div", { class: "fila", style: "gap:16px" }, [cifra, el("div", { style: "display:flex;flex-direction:column;gap:6px" }, [el("span", { class: "p-inst", text: "En la sesión 5 el profesor abre la ventana: 20 minutos para dejar el gate en verde." }), btn])]));
+    }
+    var pasos = m.pasos.map(function (p, i) {
+      var cuerpo = [];
+      if (p.cmd) cuerpo.push(cmd(p.cmd));
+      if (p.links) { var ls = p.links().filter(function (x) { return x.url !== undefined; }); if (ls.length) cuerpo.push(el("div", { class: "fila" }, ls.map(function (x) { return enlace(x.t, x.url, x.sec); }))); }
+      return paso(i + 1, p.t, p.d, cuerpo);
+    });
+    pasos.push(el("p", { class: "p-inst" }, ["Detalle de cada paso en la ", el("a", { href: GUIA + "fase-" + m.fase + "/", target: "_blank", rel: "noopener", text: "guía de la fase " + m.fase }), "."]));
+    return envolver(m, pasos, arriba);
+  }
+
+  /* ============ Vista ============ */
+  function pintarTodo() {
+    pintarBanda(); pintarRuta();
+    var v = document.getElementById("vista");
+    v.textContent = "";
+    var m = MISIONES[vista()] || MISIONES[0];
+    var f = m.id === 0 ? misionCero : m.id === 1 ? misionUno : m.id === 2 ? misionDos : m.id === 3 ? misionTres : misionGuiada;
+    v.appendChild(f(m));
+  }
+
+  var resp = document.getElementById("respaldo");
+  document.getElementById("b-respaldo").addEventListener("click", function () {
+    resp.hidden = !resp.hidden;
+    if (!resp.hidden) { document.getElementById("resp-txt").value = JSON.stringify(S); document.getElementById("resp-msg").textContent = ""; }
+  });
+  document.getElementById("resp-cerrar").addEventListener("click", function () { resp.hidden = true; });
+  document.getElementById("resp-copiar").addEventListener("click", function (ev) { copiar(document.getElementById("resp-txt").value, ev.currentTarget); });
+  document.getElementById("resp-restaurar").addEventListener("click", function () {
+    var msg = document.getElementById("resp-msg");
+    try {
+      var d = JSON.parse(document.getElementById("resp-txt").value);
+      if (!d || typeof d !== "object" || !Array.isArray(d.personas)) throw new Error("formato");
+      S = Object.assign(estadoVacio(), d); guardar(); pintarTodo(); msg.textContent = "Avance restaurado.";
+    } catch (e) { msg.textContent = "Ese texto no es un respaldo del lab. Copien el respaldo completo, desde la primera llave."; }
+  });
+  var confirmar = false;
+  document.getElementById("resp-borrar").addEventListener("click", function (ev) {
+    if (!confirmar) { confirmar = true; ev.currentTarget.textContent = "Pulsen otra vez para borrar todo"; return; }
+    confirmar = false; ev.currentTarget.textContent = "Empezar de cero"; S = estadoVacio(); guardar(); resp.hidden = true; pintarTodo();
+  });
+
+  pintarTodo();
+  if (repoPartes()) actualizarRemoto(pintarTodo);
+})();
+</script>
+</body>
+</html>

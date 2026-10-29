@@ -23,15 +23,16 @@ Sesión 1, segunda mitad. Todo el equipo.
 
 - Una cuenta de GitHub por persona. Si es estudiante verificado en [GitHub Education](https://github.com/education), mejor: tendrá más horas de Codespaces y acceso a Copilot para el [bonus](../bonus-ia/).
 - El número de equipo y la app que le tocó en el sorteo.
-- Su usuario de GitHub entregado al profesor. Con él recibirá la invitación al repositorio de su equipo.
+- El [Lab de misiones](https://ic8071-sdlc-2026s2.github.io/sdlc-guia/lab/) abierto en la misión 0: los guía en cada paso de esta fase.
 
 ## Pasos
 
-### 1. Aceptar la invitación al repositorio del equipo
+### 1. Crear el repositorio del equipo
 
-1. Después del sorteo, el profesor crea el repositorio de su equipo en la organización del curso, con el nombre `sdlc-<app>-equipo-<n>`, por ejemplo `sdlc-vampi-equipo-3`. Es público.
-2. Cada persona recibe una invitación por correo y en https://github.com/notifications. También puede abrir `https://github.com/ic8071-sdlc-2026s2/sdlc-<app>-equipo-<n>/invitations`. **Acéptela**: hasta entonces no puede trabajar en el repositorio.
-3. La invitación da permisos de administración: los necesita para Pages y para el ruleset de la fase 3. Todas las personas del equipo trabajan en el mismo repositorio.
+1. Una persona del equipo abre la plantilla de su app (el lab tiene el botón) y pulsa **Use this template → Create a new repository**: dueño, su propia cuenta; nombre `sdlc-<app>-equipo-<n>`, por ejemplo `sdlc-vampi-equipo-3`; visibilidad **Public**.
+2. En **Settings → Collaborators → Add people** invita al resto del equipo. Cada persona acepta la invitación que le llega por correo o en https://github.com/notifications.
+3. En **Settings → Pages**, en «Source», eligen **GitHub Actions**.
+4. Pegan el enlace del repositorio en la misión 0 del lab.
 
 ### 2. Abrir el Codespace
 

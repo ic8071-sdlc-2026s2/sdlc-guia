@@ -31,6 +31,9 @@ back_to_top: true
 back_to_top_text: "Volver arriba"
 
 nav_external_links:
+  - title: Lab de misiones
+    url: "https://ic8071-sdlc-2026s2.github.io/sdlc-guia/lab/"
+    opens_in_new_tab: true
   - title: Tablero de avance
     url: "https://ic8071-sdlc-2026s2.github.io/sdlc-guia/tablero/"
     opens_in_new_tab: true
