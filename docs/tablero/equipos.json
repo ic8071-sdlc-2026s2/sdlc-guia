@@ -2,25 +2,25 @@
   {
     "equipo": "Equipo 1",
     "app": "OWASP Juice Shop",
-    "repo": "ORGANIZACION/sdlc-juice-shop-equipo-1",
-    "pages": "https://ORGANIZACION.github.io/sdlc-juice-shop-equipo-1/"
+    "repo": "ic8071-sdlc-2026s2/sdlc-juice-shop-equipo-1",
+    "pages": "https://ic8071-sdlc-2026s2.github.io/sdlc-juice-shop-equipo-1/"
   },
   {
     "equipo": "Equipo 2",
     "app": "OWASP PyGoat",
-    "repo": "ORGANIZACION/sdlc-pygoat-equipo-2",
-    "pages": "https://ORGANIZACION.github.io/sdlc-pygoat-equipo-2/"
+    "repo": "ic8071-sdlc-2026s2/sdlc-pygoat-equipo-2",
+    "pages": "https://ic8071-sdlc-2026s2.github.io/sdlc-pygoat-equipo-2/"
   },
   {
     "equipo": "Equipo 3",
     "app": "VAmPI",
-    "repo": "ORGANIZACION/sdlc-vampi-equipo-3",
-    "pages": "https://ORGANIZACION.github.io/sdlc-vampi-equipo-3/"
+    "repo": "ic8071-sdlc-2026s2/sdlc-vampi-equipo-3",
+    "pages": "https://ic8071-sdlc-2026s2.github.io/sdlc-vampi-equipo-3/"
   },
   {
     "equipo": "Equipo 4",
     "app": "OWASP RailsGoat",
-    "repo": "ORGANIZACION/sdlc-railsgoat-equipo-4",
-    "pages": "https://ORGANIZACION.github.io/sdlc-railsgoat-equipo-4/"
+    "repo": "ic8071-sdlc-2026s2/sdlc-railsgoat-equipo-4",
+    "pages": "https://ic8071-sdlc-2026s2.github.io/sdlc-railsgoat-equipo-4/"
   }
 ]

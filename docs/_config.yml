@@ -7,9 +7,9 @@ lang: es-CR
 
 # Organización de GitHub del curso. Cambie solo esta línea (y equipos.json en la raíz).
 # profesor/scripts/publicar-plantillas.sh la sustituye al publicar.
-org: ORGANIZACION
+org: ic8071-sdlc-2026s2
 
-url: "https://ORGANIZACION.github.io"
+url: "https://ic8071-sdlc-2026s2.github.io"
 baseurl: "/sdlc-guia"
 permalink: pretty
 
@@ -32,7 +32,7 @@ back_to_top_text: "Volver arriba"
 
 nav_external_links:
   - title: Tablero de avance
-    url: "https://ORGANIZACION.github.io/sdlc-guia/tablero/"
+    url: "https://ic8071-sdlc-2026s2.github.io/sdlc-guia/tablero/"
     opens_in_new_tab: true
 
 callouts_level: quiet
