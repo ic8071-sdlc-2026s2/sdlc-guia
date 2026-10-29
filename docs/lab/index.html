@@ -347,7 +347,7 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
   function estadoVacio() {
     return {
       vista: null, equipo: null,
-      personas: [{ nombre: "", gh: "" }, { nombre: "", gh: "" }, { nombre: "", gh: "" }, { nombre: "", gh: "" }],
+      personas: [{ nombre: "", gh: "" }, { nombre: "", gh: "" }, { nombre: "", gh: "" }],
       app: null, roles: {}, repo: "", taller: false,
       pred: [{ w: "", t: "" }, { w: "", t: "" }, { w: "", t: "" }],
       cartas: false, casos: [], borrador: borradorCaso(), reqs: [], borradorReq: borradorReq(),
@@ -441,10 +441,10 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
   }
 
   /* ============ Validaciones del lab ============ */
-  function rolesDisponibles() { return personasValidas().length >= 5 ? ROLES.concat(["Relatoría"]) : ROLES; }
+  function rolesDisponibles() { var n = personasValidas().length; return n >= 5 ? ROLES.concat(["Relatoría"]) : n === 4 ? ROLES : ROLES.slice(0, 3); }
   function problemasRoles() {
     var ps = personasValidas(), R = rolesDisponibles(), prob = [];
-    if (ps.length < 4) return ["Primero completen el equipo"];
+    if (ps.length < 3) return ["Primero completen el equipo"];
     var porPersona = {};
     SESIONES.forEach(function (se) {
       var asig = S.roles[se.s] || {}, vistos = {};
@@ -454,13 +454,14 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
         if (vistos[i]) prob.push(se.t.split(" · ")[0] + ": " + ps[i].nombre + " tiene dos roles");
         vistos[i] = 1;
         porPersona[i] = porPersona[i] || {};
-        if (porPersona[i][rol]) prob.push(ps[i].nombre + " repite " + rol);
+        if (R.length >= 4 && porPersona[i][rol]) prob.push(ps[i].nombre + " repite " + rol);
         porPersona[i][rol] = 1;
       });
     });
+    if (R.length === 3 && !prob.length) ps.forEach(function (p, i) { if (Object.keys(porPersona[i] || {}).length < 3) prob.push(p.nombre + " no pasa por los 3 roles"); });
     return prob;
   }
-  function equipoOk() { var ps = personasValidas(); return !!S.equipo && ps.length >= 4 && ps.length <= 5 && ps.every(function (p) { return ghValido(p.gh); }); }
+  function equipoOk() { var ps = personasValidas(); return !!S.equipo && ps.length >= 3 && ps.length <= 5 && ps.every(function (p) { return ghValido(p.gh); }); }
   function predOk() { return S.pred.every(function (p) { return p.w && p.t; }) && new Set(S.pred.map(function (p) { return p.w; })).size === 3; }
   function casoCompleto(c) {
     return c.titulo.trim() && c.actor.trim() && c.objetivo.trim() && c.cat && c.comp && c.carta.trim() &&
@@ -479,6 +480,7 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
       checks: ["f0.equipo", "f0.ci", "f0.pages"],
       lab: function () { return [{ t: "Equipo, app y roles completos", ok: equipoOk() && !!S.app && problemasRoles().length === 0 }, { t: "Repositorio registrado en el lab", ok: !!repoPartes() }, { t: "App corriendo en su Codespace", ok: !!S.taller }, { t: "3 predicciones distintas", ok: predOk() }]; },
       problemas: [
+        ["Inventaron a una cuarta persona", "Los equipos son de 3: quiten la fila inventada de EQUIPO.md. Si «f0.equipo» queda en rojo, en lab/checkpoints.py cambien MIN_MIEMBROS = 4 por 3."],
         ["El usuario de GitHub como enlace o con espacios", "En EQUIPO.md va solo el usuario: mfernandez. Usen el botón «Copiar EQUIPO.md» del paso 4."],
         ["Pages con «Deploy from a branch»", "Debe ser «GitHub Actions». Si no, el reporte no se publica y el lab no puede leer su estado."],
         ["El lab dice «todavía no hay estado»", "«Checkpoints» tarda 2 o 3 minutos después de cada cambio. Revisen la pestaña Actions de su repositorio."],
@@ -688,7 +690,7 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
   /* ============ Misión 0 ============ */
   function equipoMd() {
     var ps = personasValidas(), R = rolesDisponibles();
-    var L2 = ["# Equipo", "", "Una fila por integrante. El usuario de GitHub va sin espacios; el checkpoint de la fase 0 lo lee de esta tabla. Los roles rotan por sesión: nadie repite rol.", "",
+    var L2 = ["# Equipo", "", "Una fila por integrante. El usuario de GitHub va sin espacios; el checkpoint de la fase 0 lo lee de esta tabla. " + (R.length === 3 ? "Rotan Arquitectura, AppSec y DevSecOps; todo el equipo hace de Equipo rojo." : "Los roles rotan por sesión: nadie repite rol."), "",
       "| Nombre | Usuario de GitHub | Sesión 2 (fases 1 y 2) | Sesión 3 (fase 3) | Sesión 4 (fase 4) | Sesión 5 (fase 5) |", "|:---|:---|:---|:---|:---|:---|"];
     ps.forEach(function (p, i) {
       var roles = SESIONES.map(function (se) { var a = S.roles[se.s] || {}; var r = R.filter(function (rol) { return a[rol] === i; })[0]; return r || ""; });
@@ -712,9 +714,9 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
         listaP.appendChild(el("div", { class: "persona" }, [el("span", { class: "n", text: String(i + 1) }),
           el("input", { type: "text", id: "p-nombre-" + i, placeholder: "Nombre y apellido", value: p.nombre, "aria-label": "Nombre de la persona " + (i + 1), oninput: function (ev) { p.nombre = ev.target.value; guardar(); pintarRoles(); refrescar(); } }),
           el("input", { type: "text", class: "gh mono", id: "p-gh-" + i, placeholder: "usuario-de-github", value: p.gh, "aria-label": "Usuario de GitHub de la persona " + (i + 1), oninput: function (ev) { p.gh = ev.target.value.trim().replace(/^@/, ""); guardar(); refrescar(); } }),
-          el("button", { type: "button", class: "quitar", "aria-label": "Quitar a la persona " + (i + 1), title: "Quitar", disabled: S.personas.length <= 4, onclick: function () { S.personas.splice(i, 1); S.roles = {}; guardar(); pintarPersonas(); pintarRoles(); refrescar(); } }, ["×"])]));
+          el("button", { type: "button", class: "quitar", "aria-label": "Quitar a la persona " + (i + 1), title: "Quitar", disabled: S.personas.length <= 3, onclick: function () { S.personas.splice(i, 1); S.roles = {}; guardar(); pintarPersonas(); pintarRoles(); refrescar(); } }, ["×"])]));
       });
-      if (S.personas.length < 5) listaP.appendChild(el("button", { type: "button", class: "bt sec peq", onclick: function () { S.personas.push({ nombre: "", gh: "" }); guardar(); pintarPersonas(); pintarRoles(); refrescar(); } }, ["Agregar una quinta persona"]));
+      if (S.personas.length < 5) listaP.appendChild(el("button", { type: "button", class: "bt sec peq", onclick: function () { S.personas.push({ nombre: "", gh: "" }); S.roles = {}; guardar(); pintarPersonas(); pintarRoles(); refrescar(); } }, ["Agregar otra persona"]));
     }
     pintarPersonas();
     p1 = paso(1, "Equipo", "El número que les dio el sorteo y quiénes son. El usuario es el de su cuenta de GitHub.", [el("div", { class: "fila" }, [el("span", { class: "p-inst", text: "Equipo" }), seg]), listaP]);
@@ -733,7 +735,7 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
     function pintarRoles() {
       rolesCont.textContent = "";
       var ps = personasValidas(), R = rolesDisponibles();
-      if (ps.length < 4) { rolesCont.appendChild(el("p", { class: "vacio", text: "Escriban primero los nombres del equipo." })); rolesMsg.textContent = ""; return; }
+      if (ps.length < 3) { rolesCont.appendChild(el("p", { class: "vacio", text: "Escriban primero los nombres del equipo." })); rolesMsg.textContent = ""; return; }
       var porPersona = {};
       var tabla = el("table", { class: "roles" }, [el("thead", null, [el("tr", null, [el("th", { text: "Sesión" })].concat(R.map(function (r) { return el("th", { text: r }); })))])]);
       var tb = el("tbody");
@@ -744,7 +746,7 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
           var sel = el("select", { "aria-label": se.t + ", " + rol, onchange: function (ev) { asig[rol] = ev.target.value === "" ? "" : Number(ev.target.value); guardar(); pintarRoles(); refrescar(); } },
             [el("option", { value: "", text: "—" })].concat(ps.map(function (p, i) { return el("option", { value: String(i), text: p.nombre, selected: asig[rol] === i }); })));
           var i = asig[rol], mal = false;
-          if (i !== "" && i != null && ps[i]) { if (vistos[i]) mal = true; vistos[i] = 1; porPersona[i] = porPersona[i] || {}; if (porPersona[i][rol]) mal = true; porPersona[i][rol] = 1; }
+          if (i !== "" && i != null && ps[i]) { if (vistos[i]) mal = true; vistos[i] = 1; porPersona[i] = porPersona[i] || {}; if (R.length >= 4 && porPersona[i][rol]) mal = true; porPersona[i][rol] = 1; }
           if (mal) sel.className = "mal";
           tr.appendChild(el("td", null, [sel]));
         });
@@ -757,10 +759,10 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
     }
     pintarRoles();
     var rotar = el("button", { type: "button", class: "bt sec peq", onclick: function () {
-      var ps = personasValidas(), R = rolesDisponibles(); if (ps.length < 4) return;
+      var ps = personasValidas(), R = rolesDisponibles(); if (ps.length < 3) return;
       SESIONES.forEach(function (se, j) { var a = {}; R.forEach(function (rol, r) { a[rol] = (r + j) % ps.length; }); S.roles[se.s] = a; });
       guardar(); pintarRoles(); refrescar(); } }, ["Rotar automáticamente"]);
-    p3 = paso(3, "Roles", "Quien tiene el rol lidera esa fase; todo el equipo trabaja en ella. Nadie repite rol.", [rotar, rolesCont, rolesMsg]);
+    p3 = paso(3, "Roles", "Con 3 personas rotan Arquitectura, AppSec y DevSecOps, y todo el equipo hace de Equipo rojo. Cada persona pasa por los tres roles. Quien tiene el rol lidera esa fase.", [rotar, rolesCont, rolesMsg]);
 
     var ghCont = el("div", { style: "display:flex;flex-direction:column;gap:10px" });
     var extraCont = el("div", { style: "display:flex;flex-direction:column;gap:10px" });
@@ -810,6 +812,9 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
           el("div", { class: "fila" }, [el("button", { type: "button", class: "bt peq", disabled: !(equipoOk() && problemasRoles().length === 0), onclick: function (ev) { copiar(equipoMd(), ev.currentTarget); } }, ["Copiar EQUIPO.md"]),
             enlace("Editar EQUIPO.md", gh("edit/main/EQUIPO.md"), true)]),
           (equipoOk() && problemasRoles().length === 0) ? null : el("span", { class: "p-falta", text: "Completen antes los pasos 1 a 3." })]));
+        var c0 = checkRemoto("f0.equipo");
+        if (c0 && !c0.ok) extraCont.appendChild(el("div", { class: "aviso" }, [el("b", { text: "¿Son 3 y «f0.equipo» sigue en rojo? " }),
+          "Su repositorio trae el mínimo viejo de 4. En lab/checkpoints.py cambien MIN_MIEMBROS = 4 por MIN_MIEMBROS = 3 y hagan commit. ", enlace("Editar lab/checkpoints.py", gh("edit/main/lab/checkpoints.py"), true)]));
         extraCont.appendChild(el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "e · Avísenle al profesor" }),
           el("span", { text: "Pásenle este texto para que su equipo aparezca en el tablero de la clase." }),
           el("button", { type: "button", class: "bt sec peq", onclick: function (ev) {
@@ -854,9 +859,9 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
 
     function estados() {
       var ps = personasValidas(), malos = ps.filter(function (p) { return !ghValido(p.gh); }).length;
-      marcar(p1, equipoOk(), "Listo.", !S.equipo ? "Falta el número de equipo." : ps.length < 4 ? "Faltan " + (4 - ps.length) + " persona(s)." : malos ? malos + " usuario(s) de GitHub con formato inválido." : "");
+      marcar(p1, equipoOk(), "Listo.", !S.equipo ? "Falta el número de equipo." : ps.length < 3 ? "Faltan " + (3 - ps.length) + " persona(s)." : malos ? malos + " usuario(s) de GitHub con formato inválido." : "");
       marcar(p2, !!S.app, "Listo.", "Falta elegir la app.");
-      marcar(p3, problemasRoles().length === 0, "Listo: nadie repite rol.", ps.length < 4 ? "Primero completen el equipo en el paso 1." : "Revisen las celdas en rojo o usen «Rotar automáticamente».");
+      marcar(p3, problemasRoles().length === 0, "Listo: los roles están repartidos.", ps.length < 3 ? "Primero completen el equipo en el paso 1." : "Revisen las celdas en rojo o usen «Rotar automáticamente».");
       var c0 = checkRemoto("f0.equipo"), c1 = checkRemoto("f0.ci"), c2 = checkRemoto("f0.pages");
       var repoOk = !!repoPartes() && !!(c0 && c0.ok && c1 && c1.ok && c2 && c2.ok);
       marcar(p4, repoOk, "Listo: su repositorio está conectado y en verde.", !repoPartes() ? "Falta registrar el enlace del repositorio." : "Sigan los pasos a a d y pulsen «Conectar».");
