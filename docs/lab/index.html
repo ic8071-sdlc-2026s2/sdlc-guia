@@ -297,7 +297,7 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
       "POST /challenge/custom-labs/create/ · Crear un laboratorio personalizado", "POST /challenge/custom-labs/delete/<id>/ · Borrar un laboratorio personalizado",
       "GET /auth/verify/ · Verificar quién es dueño de un laboratorio"] },
     "vampi": { n: "VAmPI", tipo: "API REST", logo: "VA", stack: ["Python", "Flask", "Connexion", "SQLite"], puerto: 5000, cmd: "bash lab/app.sh levantar",
-      tip: "No tiene pantallas: abran /ui/ y prueben la API desde el Swagger.", ext: "py", comps: [
+      tip: "No tiene pantallas: abran /ui/ y prueben la API desde el Swagger. Si una ruta responde un error de base de datos, abran /createdb una vez.", ext: "py", comps: [
       "POST /users/v1/login · Inicio de sesión con JWT", "POST /users/v1/register · Registro", "GET /users/v1 · Lista de usuarios",
       "GET /users/v1/_debug · Detalle de todos los usuarios", "GET /users/v1/{username} · Usuario por nombre", "DELETE /users/v1/{username} · Borrar un usuario",
       "PUT /users/v1/{username}/email · Cambiar el correo", "PUT /users/v1/{username}/password · Cambiar la contraseña", "GET /me · Datos del usuario del token",
@@ -480,6 +480,9 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
       checks: ["f0.equipo", "f0.ci", "f0.pages"],
       lab: function () { return [{ t: "Equipo, app y roles completos", ok: equipoOk() && !!S.app && problemasRoles().length === 0 }, { t: "Repositorio registrado en el lab", ok: !!repoPartes() }, { t: "App corriendo en su Codespace", ok: !!S.taller }, { t: "3 predicciones distintas", ok: predOk() }]; },
       problemas: [
+        ["Aceptaron un workflow de Jekyll al activar Pages", "Bórrenlo: .github/workflows/jekyll-gh-pages.yml. Publica en el mismo Pages que «Checkpoints» y le borra el estado al lab."],
+        ["VAmPI responde un error de base de datos", "Abran /createdb una vez en el puerto 5000, o vuelvan a correr bash lab/app.sh levantar."],
+        ["«Fase 0 · CI» salió en rojo una vez", "Si las corridas anteriores pasaron, en Actions abran la corrida y pulsen «Re-run failed jobs»."],
         ["Inventaron a una cuarta persona", "Los equipos son de 3: quiten la fila inventada de EQUIPO.md. Si «f0.equipo» queda en rojo, en lab/checkpoints.py cambien MIN_MIEMBROS = 4 por 3."],
         ["El usuario de GitHub como enlace o con espacios", "En EQUIPO.md va solo el usuario: mfernandez. Usen el botón «Copiar EQUIPO.md» del paso 4."],
         ["Pages con «Deploy from a branch»", "Debe ser «GitHub Actions». Si no, el reporte no se publica y el lab no puede leer su estado."],
@@ -795,6 +798,7 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
           enlace("Abrir Collaborators", gh("settings/access"), true)]),
         el("div", { class: "mini" }, [el("span", { class: "mi-n", text: "c · Publicar" }),
           el("span", null, [el("span", { class: "ruta-gh", text: "Settings → Pages" }), ". En «Source» elijan ", el("b", { text: "GitHub Actions" }), "."]),
+          el("span", { class: "p-falta", text: "Si GitHub les sugiere un workflow de Jekyll o de HTML estático, no lo acepten: ya viene uno." }),
           enlace("Abrir Pages", gh("settings/pages"), true)])
       ]));
       ghCont.appendChild(el("div", { class: "campo" }, [el("label", { for: "repo", text: "Enlace del repositorio" }), el("div", { class: "fila" }, [repoIn, conectar])]));
