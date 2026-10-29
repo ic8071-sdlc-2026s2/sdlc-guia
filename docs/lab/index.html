@@ -480,6 +480,7 @@ th{font-size:12px;color:var(--txt-2);font-weight:600;background:var(--bg-3)}
       checks: ["f0.equipo", "f0.ci", "f0.pages"],
       lab: function () { return [{ t: "Equipo, app y roles completos", ok: equipoOk() && !!S.app && problemasRoles().length === 0 }, { t: "Repositorio registrado en el lab", ok: !!repoPartes() }, { t: "App corriendo en su Codespace", ok: !!S.taller }, { t: "3 predicciones distintas", ok: predOk() }]; },
       problemas: [
+        ["«docker: command not found» en el Codespace", "Su repositorio trae una imagen que ya no instala Docker. En GitHub editen .devcontainer/devcontainer.json: cambien python:3.12 por python:3.12-bookworm y hagan commit. Luego borren el Codespace en github.com/codespaces y creen uno nuevo."],
         ["Aceptaron un workflow de Jekyll al activar Pages", "Bórrenlo: .github/workflows/jekyll-gh-pages.yml. Publica en el mismo Pages que «Checkpoints» y le borra el estado al lab."],
         ["VAmPI responde un error de base de datos", "Abran /createdb una vez en el puerto 5000, o vuelvan a correr bash lab/app.sh levantar."],
         ["«Fase 0 · CI» salió en rojo una vez", "Si las corridas anteriores pasaron, en Actions abran la corrida y pulsen «Re-run failed jobs»."],
