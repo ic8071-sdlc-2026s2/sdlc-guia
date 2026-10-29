@@ -27,7 +27,7 @@ Son 5 sesiones de 90 minutos. Las fechas las fija el enunciado del curso. Cada s
 
 | Sesión | Fases | Qué hace el equipo | Guía |
 |:---|:---|:---|:---|
-| 1 | Clase 24 y fase 0 | Clase de DevOps y DevSecOps, actividad «Diseña tu pipeline». Sorteo de apps, roles, tarea de Classroom, Codespace y primer pipeline en verde | [Fase 0](fase-0/) |
+| 1 | Clase 24 y fase 0 | Clase de DevOps y DevSecOps, actividad «Diseña tu pipeline». Sorteo de apps, roles, repositorio del equipo, Codespace y primer pipeline en verde | [Fase 0](fase-0/) |
 | 2 | Fases 1 y 2 | Casos de abuso con Cornucopia, requerimientos ASVS 5.0, DFD con fronteras de confianza y matriz de riesgos 3 por 3 | [Fase 1](fase-1/), [Fase 2](fase-2/) |
 | 3 | Fase 3 | Semgrep con regla propia, Gitleaks, Dependabot, Dependency Review, Scorecard y endurecimiento del pipeline | [Fase 3](fase-3/) |
 | 4 | Fase 4 | ZAP contra la app levantada en el runner y pruebas pytest desde los casos de abuso | [Fase 4](fase-4/) |

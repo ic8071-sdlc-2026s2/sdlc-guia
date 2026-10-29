@@ -33,7 +33,7 @@ Una entrada por equipo. El verificador usa `equipo` y `repo`; el tablero usa ade
 ]
 ```
 
-- `repo` es `<organizacion>/<prefijo de la tarea>-<nombre del equipo>`, como lo crea GitHub Classroom.
+- `repo` es `<organizacion>/<prefijo de la tarea>-<nombre del equipo>`, como lo crea `profesor/scripts/crear-equipos.sh`: `sdlc-<app>-equipo-<n>`.
 - `pages` es opcional; si falta, el tablero la arma con el dueño en minúsculas y el nombre del repositorio.
 - El tablero lee `docs/tablero/equipos.json`, que es una copia de la raíz: el workflow del verificador y `cerrar-sesion.sh` la actualizan. Si edita a mano, copie el archivo a las dos rutas.
 

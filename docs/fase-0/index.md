@@ -23,15 +23,15 @@ Sesión 1, segunda mitad. Todo el equipo.
 
 - Una cuenta de GitHub por persona. Si es estudiante verificado en [GitHub Education](https://github.com/education), mejor: tendrá más horas de Codespaces y acceso a Copilot para el [bonus](../bonus-ia/).
 - El número de equipo y la app que le tocó en el sorteo.
-- El enlace de la tarea de GitHub Classroom **de su app**. Hay cuatro tareas, una por app; su equipo acepta solo la suya.
+- Su usuario de GitHub entregado al profesor. Con él recibirá la invitación al repositorio de su equipo.
 
 ## Pasos
 
-### 1. Aceptar la tarea de Classroom
+### 1. Aceptar la invitación al repositorio del equipo
 
-1. Una sola persona abre el enlace de la tarea de su app, acepta y **crea el equipo** con el nombre exacto que dio el sorteo, por ejemplo `equipo-1`.
-2. Las demás personas abren el mismo enlace y **se unen a ese equipo**. No creen equipos nuevos.
-3. Classroom crea el repositorio `sdlc-<app>-<equipo>` en la organización del curso, por ejemplo `sdlc-vampi-equipo-3`. Es público y su equipo tiene permisos de administración: los necesita para Pages y para el ruleset de la fase 3.
+1. Después del sorteo, el profesor crea el repositorio de su equipo en la organización del curso, con el nombre `sdlc-<app>-equipo-<n>`, por ejemplo `sdlc-vampi-equipo-3`. Es público.
+2. Cada persona recibe una invitación por correo y en https://github.com/notifications. También puede abrir `https://github.com/ic8071-sdlc-2026s2/sdlc-<app>-equipo-<n>/invitations`. **Acéptela**: hasta entonces no puede trabajar en el repositorio.
+3. La invitación da permisos de administración: los necesita para Pages y para el ruleset de la fase 3. Todas las personas del equipo trabajan en el mismo repositorio.
 
 ### 2. Abrir el Codespace
 
@@ -111,7 +111,7 @@ Cuando las tres condiciones se cumplen, el workflow cierra el issue **Fase 0** y
 
 ## Errores comunes
 
-- **Crear un equipo nuevo en Classroom en vez de unirse.** Classroom crea un repositorio por equipo; un equipo duplicado deja a una persona sola en otro repositorio. Avise al profesor para que lo corrija.
+- **No aceptar la invitación.** Sin aceptarla no ve el botón de Codespaces ni puede editar. Revise el correo o las notificaciones de GitHub; si no llegó, avise al profesor para que la reenvíe.
 - **Escribir el usuario como enlace** (`[mfernandez](https://github.com/mfernandez)`) o con el nombre completo. El verificador espera solo el usuario.
 - **Elegir «Deploy from a branch» en Pages.** `f0.pages` pasa, pero el reporte no se publica y el tablero muestra al equipo «sin Pages».
 - **Construir Juice Shop desde `app/` en el Codespace.** Funciona, pero tarda. Use `rapido` en el Codespace; el runner de Actions sí construye desde `app/`.

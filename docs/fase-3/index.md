@@ -199,7 +199,7 @@ Dependabot, con el ecosistema `github-actions`, abre PR para actualizar estos ha
 
 ### 6. Ruleset que exige pull request
 
-Necesita permisos de administración en el repositorio; Classroom se los dio.
+Necesita permisos de administración en el repositorio; la invitación del profesor se los dio.
 
 1. **Settings → Rules → Rulesets → New ruleset → New branch ruleset**.
 2. **Ruleset name:** `main protegida`. **Enforcement status:** Active.
